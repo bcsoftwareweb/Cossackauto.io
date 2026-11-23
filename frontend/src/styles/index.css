@@ -619,6 +619,136 @@ section.trust-strip {
 	font-size: 0.9375rem;
 }
 
+.reviews-carousel {
+	margin-top: 2.5rem;
+}
+
+.review-card,
+.review-form-card {
+	padding: 1.5rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+	box-shadow: var(--shadow-sm);
+}
+
+.review-card {
+	text-align: center;
+}
+
+.review-stars {
+	margin: 0 0 0.75rem;
+	color: var(--color-red);
+	font-size: 1.25rem;
+	letter-spacing: 0.12em;
+}
+
+.review-card blockquote {
+	margin: 0;
+	color: var(--color-charcoal);
+	font-size: 1.0625rem;
+	line-height: 1.65;
+	overflow-wrap: anywhere;
+}
+
+.review-author {
+	margin: 1rem 0 0;
+	font-weight: 600;
+	color: var(--color-charcoal);
+}
+
+.review-carousel-controls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	margin-top: 1rem;
+	color: var(--color-muted);
+	font-size: 0.875rem;
+}
+
+.review-carousel-controls button {
+	border: 0;
+	background: transparent;
+	color: var(--color-red);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	padding: 0.5rem;
+}
+
+.review-form-card {
+	margin-top: 2.5rem;
+}
+
+.review-form-card h3 {
+	margin: 0 0 1.5rem;
+	font-size: 1.125rem;
+}
+
+.review-form-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1rem;
+}
+
+.review-rating-fieldset {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.review-rating-picker {
+	display: flex;
+	align-items: center;
+	margin-top: 0.25rem;
+}
+
+.review-rating-star {
+	width: 2.75rem;
+	height: 2.75rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: rgba(15, 17, 19, 0.28);
+	font-size: 2rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.review-rating-star.is-selected {
+	color: var(--color-red);
+}
+
+.review-rating-star:focus-visible {
+	outline: 2px solid var(--color-red);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+.review-storage-note,
+.review-success {
+	margin: 1rem 0 0;
+	font-size: 0.8125rem;
+}
+
+.review-success {
+	color: #047857;
+	font-weight: 600;
+}
+
+@media (min-width: 640px) {
+	.review-card,
+	.review-form-card {
+		padding: 2rem;
+	}
+
+	.review-form-grid {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
 /* Reservation form */
 .reservation-form {
 	border: 1px solid var(--color-border);
