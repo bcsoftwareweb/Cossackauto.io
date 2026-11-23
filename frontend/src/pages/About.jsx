@@ -16,7 +16,7 @@ export default function About(){
           <div className="md:col-span-1 flex justify-center md:justify-start">
             <img
               src={aboutPhoto}
-              alt="Owner of Cossack Auto"
+              alt="Owner of Cossack Auto Solutions"
               className="about-photo"
             />
           </div>
@@ -26,7 +26,7 @@ export default function About(){
             <div className="about-role">Owner / Founder</div>
 
             <div className="mt-6 about-body">
-              <p>Hi, I'm Your Name — owner of Cossack Auto. I started this shop because I believe in honest, high-quality auto repair.</p>
+              <p>Hi, I'm Your Name — owner of Cossack Auto Solutions. I started this shop because I believe in honest, high-quality auto repair.</p>
               <p>I treat every vehicle like my own and stand behind my work. If you'd like to schedule service, please use the button below to book an appointment.</p>
             </div>
 

@@ -23,7 +23,7 @@ export default function Hero() {
         <div className="hero-block">
           <div className="hero-accent" aria-hidden="true" />
           <p className="hero-eyebrow">Neighborhood auto repair</p>
-          <h1 className="hero-title">Cossack Auto</h1>
+          <h1 className="hero-title">Cossack Auto Solutions</h1>
           <p className="hero-lead">
             Honest work and fair prices from a shop you can trust down the street.
           </p>

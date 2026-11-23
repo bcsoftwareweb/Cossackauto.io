@@ -40,7 +40,7 @@ npm run build
 - I updated this repository with the current workspace snapshot. If you want me to add a deploy pipeline or a README extension (badges, license, CI), tell me which provider and I will add it.
 
 If you want any adjustments to the README content or additional setup steps (Docker, GitHub Actions), tell me which and I'll add them.
-# Cossack Auto — Local Dev
+# Cossack Auto Solutions — Local Dev
 
 Folders:
 - `frontend` — Vite + React + Tailwind app

@@ -35,10 +35,10 @@ export default function Footer() {
             <Link to="/" className="footer-logo">
               <img
                 src={logo}
-                alt="Cossack Auto"
+                alt="Cossack Auto Solutions"
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = logoFallback }}
               />
-              <span>Cossack Auto</span>
+              <span>Cossack Auto Solutions</span>
             </Link>
             <p className="footer-tagline">
               Honest neighborhood auto repair — fair prices, quality work, and service you can trust.
@@ -96,7 +96,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p className="footer-copy">© {new Date().getFullYear()} Cossack Auto. All rights reserved.</p>
+          <p className="footer-copy">© {new Date().getFullYear()} Cossack Auto Solutions. All rights reserved.</p>
         </div>
       </div>
     </footer>

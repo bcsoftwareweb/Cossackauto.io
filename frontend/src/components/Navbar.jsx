@@ -36,8 +36,8 @@ export default function Navbar() {
     <header className="site-header">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="logo flex-none flex items-center space-x-3">
-          <img src={logo} alt="Cossack Auto" className="h-12 w-12 object-contain" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=logoFallback}} />
-          <span>Cossack Auto</span>
+          <img src={logo} alt="Cossack Auto Solutions" className="h-12 w-12 object-contain" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=logoFallback}} />
+          <span>Cossack Auto Solutions</span>
         </Link>
 
         <button type="button" aria-label="toggle menu" aria-expanded={open} onClick={toggle} className="ml-auto lg:hidden p-2">
