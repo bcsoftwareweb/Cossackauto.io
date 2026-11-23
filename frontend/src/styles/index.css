@@ -247,7 +247,6 @@ section.trust-strip {
 	.footer-inner {
 		padding: 3rem 2rem 0;
 	}
-
 	.footer-grid {
 		grid-template-columns: 1.4fr 1fr 1fr 1fr;
 		gap: 2rem;
