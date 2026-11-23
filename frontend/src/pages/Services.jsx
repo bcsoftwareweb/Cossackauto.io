@@ -2,14 +2,14 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const services = [
-  { title: 'Oil Change', desc: 'Synthetic and conventional oil changes, filter replacement, fluid top-off.' },
-  { title: 'Brake Service', desc: 'Brake inspection, pads/rotors replacement, brake fluid flush and diagnostics.' },
-  { title: 'Tire Service', desc: 'Rotation, balancing, flat repair, new tires and TPMS service.' },
-  { title: 'Battery & Electrical', desc: 'Battery testing/replacement, starter/alternator diagnosis and repair.' },
-  { title: 'Engine Diagnostics', desc: 'Check engine light diagnostics, error code reading, and repair guidance.' },
-  { title: 'Transmission Service', desc: 'Transmission inspection, fluid service, and minor repairs.' },
-  { title: 'AC & Heating', desc: 'HVAC diagnostics, refrigerant recharge, heater core and blower repairs.' },
-  { title: 'Scheduled Maintenance', desc: 'Factory-scheduled service intervals to keep your warranty and reliability.' }
+  { title: 'Oil Change', desc: 'Full synthetic, blend, or conventional oil change services.' },
+  { title: 'Fluid Services', desc: 'Transmission, brake fluid, coolant, and related fluid flush services.' },
+  { title: 'Brakes', desc: 'Brake pad, rotor, and caliper replacement and service.' },
+  { title: 'Suspension and Steering', desc: 'Shocks, struts, CV axles, and steering component service.' },
+  { title: 'Batteries, Starters and Alternators', desc: 'Battery, starter, alternator, and charging system service.' },
+  { title: 'Diagnostics and Check Engine Lights', desc: 'Vehicle diagnostics and check engine light testing and troubleshooting.' },
+  { title: 'Engine Repair Work', desc: 'Engine repair and related mechanical service.' },
+  { title: 'Pre-purchase Inspections', desc: 'Vehicle inspections for buyers before making a purchase decision.' }
 ]
 
 export default function Services(){
@@ -33,6 +33,10 @@ export default function Services(){
             </article>
           ))}
         </div>
+
+        <p className="mt-10 text-center font-bold text-red-700">
+          ***Not Offered*** Major rebuilds, subframe removal, or anything that needs a lift beyond what can safely be done on jack stands
+        </p>
       </div>
     </section>
   )
