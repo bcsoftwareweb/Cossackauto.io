@@ -682,26 +682,29 @@ section.trust-strip {
 }
 
 .review-form-card h3 {
-	margin: 0 0 1.5rem;
-	font-size: 1.125rem;
+	margin: 0;
+	font-size: 1.375rem;
+	text-align: center;
 }
 
-.review-form-grid {
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: 1rem;
+.review-form-intro {
+	margin: 0.5rem 0 2rem;
+	font-size: 0.875rem;
+	text-align: center;
 }
 
 .review-rating-fieldset {
 	min-width: 0;
-	margin: 0;
+	margin: 0 auto;
 	padding: 0;
 	border: 0;
+	text-align: center;
 }
 
 .review-rating-picker {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	margin-top: 0.25rem;
 }
 
@@ -727,25 +730,97 @@ section.trust-strip {
 	border-radius: 4px;
 }
 
+.review-rating-error {
+	margin: 0.25rem 0 0;
+	color: var(--color-red);
+	font-size: 0.8125rem;
+}
+
+.review-form-fields {
+	max-width: 32.5rem;
+	margin: 3.5rem auto 0;
+}
+
+.review-line-textarea,
+.review-line-input {
+	display: block;
+	width: 100%;
+	border: 0;
+	border-bottom: 1px solid var(--color-border-hover);
+	border-radius: 0;
+	background: transparent;
+	padding: 0.875rem 0;
+	color: var(--color-charcoal);
+	font: inherit;
+}
+
+.review-line-textarea {
+	min-height: 7rem;
+	resize: vertical;
+}
+
+.review-line-input {
+	margin-top: 1.5rem;
+}
+
+.review-line-textarea::placeholder,
+.review-line-input::placeholder {
+	color: rgba(15, 17, 19, 0.45);
+	opacity: 1;
+}
+
+.review-line-textarea:focus,
+.review-line-input:focus {
+	outline: none;
+	border-bottom-color: var(--color-red);
+	box-shadow: 0 1px 0 var(--color-red);
+}
+
+.review-post-button {
+	display: block;
+	width: 7.25rem;
+	min-height: 2.75rem;
+	margin: 2rem 0 0 auto;
+	border: 1px solid var(--color-charcoal);
+	border-radius: 7px;
+	background: var(--color-charcoal);
+	color: var(--color-offwhite);
+	font: inherit;
+	font-size: 0.875rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.review-post-button:hover {
+	background: #1a1c1e;
+}
+
+.review-post-button:focus-visible {
+	outline: 2px solid var(--color-red);
+	outline-offset: 3px;
+}
+
 .review-storage-note,
 .review-success {
 	margin: 1rem 0 0;
 	font-size: 0.8125rem;
 }
 
+.review-storage-note {
+	text-align: center;
+}
+
 .review-success {
 	color: #047857;
 	font-weight: 600;
+	text-align: center;
 }
 
 @media (min-width: 640px) {
 	.review-card,
 	.review-form-card {
 		padding: 2rem;
-	}
-
-	.review-form-grid {
-		grid-template-columns: 1fr 1fr;
 	}
 }
 
