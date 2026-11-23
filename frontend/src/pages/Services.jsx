@@ -19,7 +19,7 @@ export default function Services(){
         <div className="page-header">
           <p className="page-eyebrow">What we offer</p>
           <h2>Services</h2>
-          <p className="page-header-lead">We provide a full range of maintenance and repair services — from routine oil changes to engine diagnostics and transmission work.</p>
+          <p className="page-header-lead">From oil changes and fluid service to brakes, suspension, diagnostics, engine repair, and pre-purchase inspections, we provide reliable maintenance and repair solutions for your vehicle.</p>
         </div>
 
         <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
