@@ -641,7 +641,7 @@ section.hero {
 
 .reviews-carousel {
 	position: relative;
-	top: 20rem;
+	top: 12rem;
 	width: 100%;
 	max-width: 19rem;
 	margin: 4rem auto 0;
@@ -649,7 +649,7 @@ section.hero {
 
 @media (max-width: 767px) {
 	.reviews-carousel {
-		top: 8rem;
+		top: 6rem;
 	}
 }
 
