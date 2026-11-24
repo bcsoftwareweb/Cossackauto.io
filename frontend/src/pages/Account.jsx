@@ -72,7 +72,7 @@ export default function Account() {
         setProfileError('')
       } catch (error) {
         if (!active) return
-        console.error('Loading the customer profile failed:', error)
+        console.error('Loading the account profile failed:', error)
         setProfileError(error.message || 'Account details could not be loaded.')
       }
     }
@@ -114,7 +114,7 @@ export default function Account() {
 
         if (data.session) {
           setUser(data.user)
-          setSessionMessage('Your customer account has been created.')
+          setSessionMessage('Your account has been created.')
         } else {
           setFeedback({
             message: 'If this email can be registered, a confirmation link will be sent. Check your inbox to finish creating your account.',
@@ -135,7 +135,7 @@ export default function Account() {
         setForm(current => ({ ...current, password: '' }))
       }
     } catch (error) {
-      console.error('Customer account request failed:', error)
+      console.error('Account request failed:', error)
       setFeedback({ message: '', error: error.message || 'The account request failed. Please try again.' })
     } finally {
       setSubmitting(false)
@@ -163,8 +163,8 @@ export default function Account() {
   return (
     <section className="account-section">
       <header className="account-page-header">
-        <p className="page-eyebrow">Customer access</p>
-        <h1>{user ? 'Account details' : 'Customer sign in or sign up'}</h1>
+        <p className="page-eyebrow">Account access</p>
+        <h1>{user ? 'Account details' : 'Sign in or sign up'}</h1>
       </header>
 
       {loadingSession ? (
@@ -175,7 +175,7 @@ export default function Account() {
           {profile ? (
             <p className="account-role">
               {profile.full_name ? `${profile.full_name} · ` : ''}
-              {profile.role === 'admin' ? 'Administrator' : 'Customer'}
+              {profile.role === 'admin' ? 'Administrator' : 'Account'}
             </p>
           ) : profileError ? (
             <p className="account-message account-message--error" role="alert">{profileError}</p>
@@ -192,7 +192,7 @@ export default function Account() {
         <article className="account-card">
           {sessionError && <p className="account-message account-message--error" role="alert">{sessionError}</p>}
           {sessionMessage && <p className="account-message" role="status">{sessionMessage}</p>}
-          <div className="account-mode-toggle" role="group" aria-label="Customer account action">
+          <div className="account-mode-toggle" role="group" aria-label="Account action">
             <button
               type="button"
               aria-pressed={mode === 'signin'}
@@ -266,7 +266,7 @@ export default function Account() {
             {feedback.message && <p className="account-message" role="status">{feedback.message}</p>}
             {feedback.error && <p className="account-message account-message--error" role="alert">{feedback.error}</p>}
             <button type="submit" className="btn-primary account-submit" disabled={submitting}>
-              {submitting ? 'Please wait...' : mode === 'signup' ? 'Create customer account' : 'Sign in as customer'}
+              {submitting ? 'Please wait...' : mode === 'signup' ? 'Create account' : 'Sign in'}
             </button>
           </form>
         </article>
