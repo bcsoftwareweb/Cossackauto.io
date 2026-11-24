@@ -12,6 +12,7 @@ import Reviews from './pages/Reviews'
 import Account from './pages/Account'
 import AdminAccount from './pages/AdminAccount'
 import CustomerUpdates from './pages/CustomerUpdates'
+import CustomPage from './pages/CustomPage'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/account" element={<Account />} />
             <Route path="/admin" element={<AdminAccount />} />
             <Route path="/updates" element={<CustomerUpdates />} />
+            <Route path="/pages/:slug" element={<CustomPage />} />
           </Routes>
         </main>
         <Footer />

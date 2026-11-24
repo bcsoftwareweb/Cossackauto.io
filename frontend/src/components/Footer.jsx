@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { logo, logoFallback } from '../config/brand'
+import { getSiteImageUrl } from './SiteContent'
+import useSiteSettings from '../hooks/useSiteSettings'
 import CONTACT from '../config/contact'
 
 const NAV_LINKS = [
@@ -23,6 +25,8 @@ function formatPhone(raw) {
 }
 
 export default function Footer() {
+  const siteSettings = useSiteSettings()
+  const logoUrl = getSiteImageUrl(siteSettings.logo_path) || logo
   const phoneDisplay = CONTACT.phone ? formatPhone(CONTACT.phone) : null
   const phoneHref = CONTACT.phone ? `tel:${CONTACT.phone}` : '/reservation'
   const emailHref = CONTACT.email ? `mailto:${CONTACT.email}` : '/reservation'
@@ -34,11 +38,11 @@ export default function Footer() {
           <div className="footer-brand">
             <Link to="/" className="footer-logo">
               <img
-                src={logo}
-                alt="Cossack Auto Solutions"
+                src={logoUrl}
+                alt={siteSettings.site_name}
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = logoFallback }}
               />
-              <span>Cossack Auto Solutions</span>
+              <span>{siteSettings.site_name}</span>
             </Link>
             <p className="footer-tagline">
               Honest neighborhood auto repair — fair prices, quality work, and service you can trust.
@@ -96,7 +100,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p className="footer-copy">© {new Date().getFullYear()} Cossack Auto Solutions. All rights reserved.</p>
+          <p className="footer-copy">© {new Date().getFullYear()} {siteSettings.site_name}. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -38,9 +38,11 @@ where id = (
 
 The profile table only lets a signed-in user read their own profile and update their name. It does not allow users to change their role. Admin access changes must be made by a trusted project owner.
 
-The admin dashboard edits page headings, the home hero, the About profile, service cards, and custom text/image sections. It can also publish customer updates, approve or unpublish customer reviews, and view registered customers' names, email addresses, and signup dates. Customer details are returned through an admin-checked database function and are not exposed to regular users. Published site sections are public; published customer updates are visible only to signed-in users at `/#/updates`. The database policies—not hidden routes or UI controls—enforce these access rules.
+The admin dashboard edits page headings, the home hero, the About profile, service cards, and custom text/image sections. It can also publish customer updates, approve or unpublish customer reviews, and view registered customers' names, email addresses, and signup dates. Customer details are returned through an admin-checked database function and are not exposed to regular users.
 
-For an existing Supabase project, apply the `admin_list_customers()` function and its grants from `schema.sql` in the SQL Editor before using the Customers dashboard panel.
+The Header & Navigation panel lets an admin change the site name, upload a logo, customize header colors, and add, edit, remove, publish, or reorder navbar links. Links can point to a website page or a safe external URL. The Pages panel creates and publishes custom pages; Manage Content adds and arranges text/image sections on those pages. Deleting a custom page also removes its sections and page-linked navbar item. Published site sections/pages and navbar links are public; published customer updates are visible only to signed-in users at `/#/updates`. Database policies enforce these access rules.
+
+For an existing Supabase project, run the updated `schema.sql` in the SQL Editor to add the site settings, navigation, and custom-page tables and policies before using these CMS features.
 
 New reviews have `is_published = false` and stay hidden until approved in the admin dashboard. To approve a review manually instead, use the Supabase SQL Editor:
 

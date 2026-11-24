@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { getSiteImageUrl, SITE_PAGES } from '../components/SiteContent'
-import { uploadSiteImage } from '../utils/cms'
+import { SITE_PAGES } from '../components/SiteContent'
+import CmsImageField from '../components/CmsImageField'
+import SiteDesignManager from './SiteDesignManager'
+import SitePagesManager from './SitePagesManager'
 import { supabase } from '../utils/supabase'
 
 const EMPTY_SECTION = {
@@ -23,57 +25,9 @@ const EMPTY_UPDATE = {
   is_published: false,
 }
 
-function ImageUploadField({ userId, value, onChange, label }) {
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState('')
-  const imageUrl = getSiteImageUrl(value)
-
-  async function onFileChange(event) {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (!file) return
-
-    setUploading(true)
-    setError('')
-    try {
-      const path = await uploadSiteImage(userId, file)
-      onChange(path)
-    } catch (uploadError) {
-      console.error('Uploading site image failed:', uploadError)
-      setError(uploadError.message || 'The image could not be uploaded.')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  return (
-    <div className="cms-image-field">
-      <label className="cms-field">
-        <span>{label}</span>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          onChange={onFileChange}
-          disabled={uploading}
-        />
-        <span className="cms-field-hint">JPG, PNG, WebP, or GIF; up to 10 MB.</span>
-      </label>
-      {uploading && <p role="status">Uploading image...</p>}
-      {error && <p className="account-message account-message--error" role="alert">{error}</p>}
-      {imageUrl && (
-        <div className="cms-image-preview">
-          <img src={imageUrl} alt="Current content" />
-          <button type="button" className="btn-secondary" onClick={() => onChange('')}>
-            Remove image
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
 function SiteSectionManager({ user }) {
   const [sections, setSections] = useState([])
+  const [pages, setPages] = useState(SITE_PAGES)
   const [form, setForm] = useState(EMPTY_SECTION)
   const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -87,14 +41,22 @@ function SiteSectionManager({ user }) {
     setLoading(true)
     setLoadError('')
     try {
-      const { data, error } = await supabase
+      const [sectionsResult, pagesResult] = await Promise.all([
+        supabase
         .from('site_sections')
         .select('id, page_slug, section_key, section_type, eyebrow, title, body, image_path, button_label, button_url, sort_order, is_published, updated_at')
         .order('page_slug', { ascending: true })
-        .order('sort_order', { ascending: true })
+        .order('sort_order', { ascending: true }),
+        supabase
+          .from('site_pages')
+          .select('slug, title')
+          .order('title', { ascending: true }),
+      ])
 
-      if (error) throw error
-      setSections(data ?? [])
+      if (sectionsResult.error) throw sectionsResult.error
+      if (pagesResult.error) throw pagesResult.error
+      setSections(sectionsResult.data ?? [])
+      setPages((pagesResult.data ?? []).map(page => ({ value: page.slug, label: page.title })))
     } catch (error) {
       console.error('Loading site sections failed:', error)
       setLoadError(error.message || 'Website sections could not be loaded.')
@@ -129,6 +91,9 @@ function SiteSectionManager({ user }) {
     setForm(current => {
       const next = { ...current, [field]: value }
       if (field === 'page_slug' && value !== 'services' && next.section_type === 'service') {
+        next.section_type = 'content'
+      }
+      if (field === 'page_slug' && SITE_PAGES.some(page => page.value === value) && next.section_type === 'intro') {
         next.section_type = 'content'
       }
       return next
@@ -210,12 +175,13 @@ function SiteSectionManager({ user }) {
               : section.title || 'Untitled section'}
           </span>
           <span className="cms-item-meta">
-            {SITE_PAGES.find(page => page.value === section.page_slug)?.label ?? section.page_slug}
+            {pages.find(page => page.value === section.page_slug)?.label ?? section.page_slug}
             {' · '}{section.section_type}
             {' · '}{section.is_published ? 'Published' : 'Draft'}
           </span>
         </button>
-        {!['hero', 'intro', 'profile'].includes(section.section_type) && (
+        {(!SITE_PAGES.some(page => page.value === section.page_slug)
+          || !['hero', 'intro', 'profile'].includes(section.section_type)) && (
           <button type="button" className="cms-item-delete" onClick={() => deleteSection(section)}>
             Delete
           </button>
@@ -282,7 +248,7 @@ function SiteSectionManager({ user }) {
           <label className="cms-field">
             <span>Page</span>
             <select value={form.page_slug} onChange={event => updateForm('page_slug', event.target.value)} disabled={Boolean(editingId)}>
-              {SITE_PAGES.map(page => <option key={page.value} value={page.value}>{page.label}</option>)}
+              {pages.map(page => <option key={page.value} value={page.value}>{page.label}</option>)}
             </select>
           </label>
           {editingId ? (
@@ -292,6 +258,9 @@ function SiteSectionManager({ user }) {
               <span>Section type</span>
               <select value={form.section_type} onChange={event => updateForm('section_type', event.target.value)}>
                 <option value="content">Text and image</option>
+                {!SITE_PAGES.some(page => page.value === form.page_slug) && (
+                  <option value="intro">Page heading</option>
+                )}
                 {form.page_slug === 'services' && <option value="service">Service card</option>}
               </select>
             </label>
@@ -308,7 +277,7 @@ function SiteSectionManager({ user }) {
             <span>Text</span>
             <textarea value={form.body} onChange={event => updateForm('body', event.target.value)} rows={6} maxLength={10000} />
           </label>
-          <ImageUploadField
+          <CmsImageField
             userId={user.id}
             value={form.image_path}
             onChange={imagePath => updateForm('image_path', imagePath)}
@@ -483,7 +452,7 @@ function CustomerUpdateManager({ user }) {
             <span>Message</span>
             <textarea value={form.body} onChange={event => updateForm('body', event.target.value)} rows={8} maxLength={10000} required />
           </label>
-          <ImageUploadField
+          <CmsImageField
             userId={user.id}
             value={form.image_path}
             onChange={imagePath => updateForm('image_path', imagePath)}
@@ -730,6 +699,12 @@ export default function AdminDashboard({ user, onSignOut }) {
           <button type="button" aria-current={tab === 'content' ? 'page' : undefined} className={tab === 'content' ? 'is-active' : ''} onClick={() => setTab('content')}>
             Manage Content
           </button>
+          <button type="button" aria-current={tab === 'design' ? 'page' : undefined} className={tab === 'design' ? 'is-active' : ''} onClick={() => setTab('design')}>
+            Header &amp; Navigation
+          </button>
+          <button type="button" aria-current={tab === 'pages' ? 'page' : undefined} className={tab === 'pages' ? 'is-active' : ''} onClick={() => setTab('pages')}>
+            Pages
+          </button>
           <button type="button" aria-current={tab === 'updates' ? 'page' : undefined} className={tab === 'updates' ? 'is-active' : ''} onClick={() => setTab('updates')}>
             Customer Updates
           </button>
@@ -744,11 +719,15 @@ export default function AdminDashboard({ user, onSignOut }) {
         <div className="cms-dashboard-main">
           {tab === 'content'
             ? <SiteSectionManager user={user} />
-            : tab === 'updates'
-              ? <CustomerUpdateManager user={user} />
-              : tab === 'reviews'
-                ? <ReviewManager />
-                : <CustomerManager />}
+            : tab === 'design'
+              ? <SiteDesignManager user={user} />
+              : tab === 'pages'
+                ? <SitePagesManager />
+                : tab === 'updates'
+                  ? <CustomerUpdateManager user={user} />
+                  : tab === 'reviews'
+                    ? <ReviewManager />
+                    : <CustomerManager />}
         </div>
       </div>
     </section>

@@ -160,6 +160,8 @@ section.hero {
 	top: 0;
 	z-index: 50;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	background-color: var(--site-header-background, var(--color-charcoal));
+	color: var(--site-header-text, var(--color-offwhite));
 }
 
 .site-header .logo {
@@ -186,7 +188,7 @@ section.hero {
 .site-header nav ul li { list-style: none; }
 
 .site-header nav ul li a {
-	color: rgba(239, 231, 221, 0.82);
+	color: var(--site-header-text, rgba(239, 231, 221, 0.82));
 	font-size: 0.875rem;
 	font-weight: 500;
 	padding: 0.375rem 0.625rem;
@@ -195,7 +197,16 @@ section.hero {
 }
 
 .site-header nav ul li a:hover {
-	color: var(--color-offwhite);
+	color: var(--site-header-text, var(--color-offwhite));
+}
+
+.site-header .mobile-nav {
+	background-color: var(--site-header-background, var(--color-charcoal));
+	color: var(--site-header-text, var(--color-offwhite));
+}
+
+.site-header .mobile-nav a {
+	color: inherit;
 }
 
 .site-header nav {
@@ -212,6 +223,8 @@ section.hero {
 .site-header .btn-primary {
 	padding: 0.5rem 1rem;
 	font-size: 0.8125rem;
+	background-color: var(--site-header-accent, var(--color-red));
+	border-color: var(--site-header-accent, var(--color-red));
 }
 
 .site-header .header-cta {
@@ -225,9 +238,9 @@ section.hero {
 	gap: 0.4rem;
 	min-height: 2.375rem;
 	padding: 0.35rem 0.75rem;
-	border: 1px solid rgba(239, 231, 221, 0.3);
+	border: 1px solid currentColor;
 	border-radius: var(--radius);
-	color: var(--color-offwhite);
+	color: var(--site-header-text, var(--color-offwhite));
 	font-size: 0.8125rem;
 	font-weight: 600;
 	text-decoration: none;
@@ -235,13 +248,13 @@ section.hero {
 }
 
 .site-header .account-cta:hover {
-	border-color: rgba(239, 231, 221, 0.65);
+	border-color: currentColor;
 	background: rgba(255, 255, 255, 0.06);
-	color: #fff;
+	color: var(--site-header-text, #fff);
 }
 
 .site-header .account-cta:focus-visible {
-	outline: 2px solid var(--color-offwhite);
+	outline: 2px solid var(--site-header-text, var(--color-offwhite));
 	outline-offset: 3px;
 }
 
@@ -1185,6 +1198,39 @@ section.hero {
 	font-size: 1.25rem;
 }
 
+.cms-design-settings {
+	display: grid;
+	gap: 1.25rem;
+	margin-bottom: 2rem;
+}
+
+.cms-design-colors {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.cms-design-colors input[type="color"] {
+	min-height: 3rem;
+	padding: 0.25rem;
+}
+
+.cms-navigation-heading {
+	margin-top: 2rem;
+}
+
+.cms-page-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.cms-page-actions a {
+	color: var(--color-red);
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
 .cms-field {
 	display: grid;
 	gap: 0.4rem;
@@ -1430,6 +1476,10 @@ section.hero {
 	}
 
 	.cms-manager-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.cms-design-colors {
 		grid-template-columns: 1fr;
 	}
 

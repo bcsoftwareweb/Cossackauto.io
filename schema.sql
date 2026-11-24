@@ -115,9 +115,178 @@ $$;
 revoke all on function public.admin_list_customers() from public, anon;
 grant execute on function public.admin_list_customers() to authenticated;
 
+create table if not exists public.site_pages (
+  slug text primary key check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  title text not null check (length(trim(title)) between 1 and 120),
+  is_system boolean not null default false,
+  is_published boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+insert into public.site_pages (slug, title, is_system, is_published)
+values
+  ('home', 'Home', true, true),
+  ('about', 'About', true, true),
+  ('services', 'Services', true, true),
+  ('reviews', 'Reviews', true, true),
+  ('reservation', 'Reservation', true, true)
+on conflict (slug) do nothing;
+
+alter table public.site_pages enable row level security;
+
+revoke all on table public.site_pages from public, anon, authenticated;
+grant select on table public.site_pages to anon, authenticated;
+grant insert (slug, title, is_published) on table public.site_pages to authenticated;
+grant update (slug, title, is_published) on table public.site_pages to authenticated;
+grant delete on table public.site_pages to authenticated;
+
+drop policy if exists "Anyone can read published site pages" on public.site_pages;
+create policy "Anyone can read published site pages"
+  on public.site_pages for select to anon, authenticated
+  using (is_published = true);
+
+drop policy if exists "Admins can read all site pages" on public.site_pages;
+create policy "Admins can read all site pages"
+  on public.site_pages for select to authenticated
+  using (public.is_admin());
+
+drop policy if exists "Admins can create custom site pages" on public.site_pages;
+create policy "Admins can create custom site pages"
+  on public.site_pages for insert to authenticated
+  with check (public.is_admin() and not is_system);
+
+drop policy if exists "Admins can update custom site pages" on public.site_pages;
+create policy "Admins can update custom site pages"
+  on public.site_pages for update to authenticated
+  using (public.is_admin() and not is_system)
+  with check (public.is_admin() and not is_system);
+
+drop policy if exists "Admins can delete custom site pages" on public.site_pages;
+create policy "Admins can delete custom site pages"
+  on public.site_pages for delete to authenticated
+  using (public.is_admin() and not is_system);
+
+create table if not exists public.site_settings (
+  id smallint primary key default 1 check (id = 1),
+  site_name text not null default 'Cossack Auto Solutions'
+    check (length(trim(site_name)) between 1 and 100),
+  logo_path text,
+  header_background_color text not null default '#0f1113'
+    check (header_background_color ~ '^#[0-9A-Fa-f]{6}$'),
+  header_text_color text not null default '#efe7dd'
+    check (header_text_color ~ '^#[0-9A-Fa-f]{6}$'),
+  header_accent_color text not null default '#8e0f18'
+    check (header_accent_color ~ '^#[0-9A-Fa-f]{6}$'),
+  updated_at timestamptz not null default now()
+);
+
+insert into public.site_settings (id)
+values (1)
+on conflict (id) do nothing;
+
+alter table public.site_settings enable row level security;
+
+revoke all on table public.site_settings from public, anon, authenticated;
+grant select on table public.site_settings to anon, authenticated;
+grant insert (id, site_name, logo_path, header_background_color, header_text_color, header_accent_color)
+  on table public.site_settings to authenticated;
+grant update (site_name, logo_path, header_background_color, header_text_color, header_accent_color)
+  on table public.site_settings to authenticated;
+
+drop policy if exists "Anyone can read site settings" on public.site_settings;
+create policy "Anyone can read site settings"
+  on public.site_settings for select to anon, authenticated
+  using (true);
+
+drop policy if exists "Admins can manage site settings" on public.site_settings;
+create policy "Admins can manage site settings"
+  on public.site_settings for all to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create table if not exists public.site_navigation (
+  id uuid primary key default gen_random_uuid(),
+  label text not null check (length(trim(label)) between 1 and 60),
+  page_slug text references public.site_pages(slug) on update cascade on delete cascade,
+  href text,
+  sort_order integer not null default 0,
+  is_published boolean not null default true,
+  created_at timestamptz not null default now(),
+  constraint site_navigation_target_check check (
+    (page_slug is not null and href is null)
+    or (page_slug is null and href is not null)
+  ),
+  constraint site_navigation_href_check check (
+    href is null
+    or (
+      (left(href, 1) = '/' and left(href, 2) <> '//')
+      or lower(href) like 'http://%'
+      or lower(href) like 'https://%'
+    )
+  ),
+  unique (page_slug)
+);
+
+insert into public.site_navigation (label, page_slug, sort_order, is_published)
+values
+  ('Home', 'home', 0, true),
+  ('About', 'about', 10, true),
+  ('Services', 'services', 20, true),
+  ('Reviews', 'reviews', 30, true),
+  ('Reservation', 'reservation', 40, true)
+on conflict (page_slug) do nothing;
+
+alter table public.site_navigation enable row level security;
+
+revoke all on table public.site_navigation from public, anon, authenticated;
+grant select on table public.site_navigation to anon, authenticated;
+grant insert (label, page_slug, href, sort_order, is_published)
+  on table public.site_navigation to authenticated;
+grant update (label, page_slug, href, sort_order, is_published)
+  on table public.site_navigation to authenticated;
+grant delete on table public.site_navigation to authenticated;
+
+drop policy if exists "Anyone can read published navigation" on public.site_navigation;
+create policy "Anyone can read published navigation"
+  on public.site_navigation for select to anon, authenticated
+  using (
+    is_published
+    and (
+      page_slug is null
+      or exists (
+        select 1
+        from public.site_pages
+        where slug = site_navigation.page_slug
+          and is_published
+      )
+    )
+  );
+
+drop policy if exists "Admins can read all navigation" on public.site_navigation;
+create policy "Admins can read all navigation"
+  on public.site_navigation for select to authenticated
+  using (public.is_admin());
+
+drop policy if exists "Admins can create navigation links" on public.site_navigation;
+create policy "Admins can create navigation links"
+  on public.site_navigation for insert to authenticated
+  with check (public.is_admin());
+
+drop policy if exists "Admins can update navigation links" on public.site_navigation;
+create policy "Admins can update navigation links"
+  on public.site_navigation for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "Admins can delete navigation links" on public.site_navigation;
+create policy "Admins can delete navigation links"
+  on public.site_navigation for delete to authenticated
+  using (public.is_admin());
+
 create table if not exists public.site_sections (
   id uuid primary key default gen_random_uuid(),
-  page_slug text not null check (page_slug in ('home', 'about', 'services', 'reviews', 'reservation')),
+  page_slug text not null references public.site_pages(slug) on update cascade on delete cascade,
   section_key text not null default gen_random_uuid()::text,
   section_type text not null check (section_type in ('hero', 'intro', 'profile', 'service', 'content')),
   eyebrow text not null default '',
@@ -135,6 +304,27 @@ create table if not exists public.site_sections (
 );
 
 alter table public.site_sections
+  drop constraint if exists site_sections_page_slug_check;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'site_sections_page_slug_fkey'
+      and conrelid = 'public.site_sections'::regclass
+  ) then
+    alter table public.site_sections
+      add constraint site_sections_page_slug_fkey
+      foreign key (page_slug)
+      references public.site_pages(slug)
+      on update cascade
+      on delete cascade;
+  end if;
+end;
+$$;
+
+alter table public.site_sections
   add column if not exists eyebrow text not null default '';
 
 alter table public.site_sections enable row level security;
@@ -150,7 +340,15 @@ grant delete on table public.site_sections to authenticated;
 drop policy if exists "Anyone can read published site sections" on public.site_sections;
 create policy "Anyone can read published site sections"
   on public.site_sections for select to anon, authenticated
-  using (is_published = true);
+  using (
+    is_published = true
+    and exists (
+      select 1
+      from public.site_pages
+      where slug = site_sections.page_slug
+        and is_published
+    )
+  );
 
 drop policy if exists "Admins can read all site sections" on public.site_sections;
 create policy "Admins can read all site sections"
@@ -231,6 +429,11 @@ revoke all on function public.set_content_updated_at() from public, anon, authen
 drop trigger if exists set_site_sections_updated_at on public.site_sections;
 create trigger set_site_sections_updated_at
   before update on public.site_sections
+  for each row execute function public.set_content_updated_at();
+
+drop trigger if exists set_site_pages_updated_at on public.site_pages;
+create trigger set_site_pages_updated_at
+  before update on public.site_pages
   for each row execute function public.set_content_updated_at();
 
 drop trigger if exists set_customer_updates_updated_at on public.customer_updates;
