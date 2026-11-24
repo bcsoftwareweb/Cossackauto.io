@@ -9,6 +9,7 @@ import About from './pages/About'
 import Home from './pages/Home'
 import Services from './pages/Services'
 import Reviews from './pages/Reviews'
+import Account from './pages/Account'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/reservation" element={<Reservation />} />
+            <Route path="/account" element={<Account />} />
           </Routes>
         </main>
         <Footer />

@@ -51,6 +51,7 @@ export default function Navbar() {
             <li><Link to="/services">Services</Link></li>
             <li><Link to="/reviews">Reviews</Link></li>
             <li><Link to="/reservation">Reservation</Link></li>
+            <li><Link to="/account">Account</Link></li>
           </ul>
         </nav>
 
@@ -63,6 +64,7 @@ export default function Navbar() {
               <li className="py-2"><Link to="/services" onClick={handleNavLinkClick}>Services</Link></li>
               <li className="py-2"><Link to="/reviews" onClick={handleNavLinkClick}>Reviews</Link></li>
               <li className="py-2"><Link to="/reservation" onClick={handleNavLinkClick}>Reservation</Link></li>
+              <li className="py-2"><Link to="/account" onClick={handleNavLinkClick}>Account</Link></li>
             </ul>
               <div className="p-4 border-t border-white/5">
               <Link to="/reservation" onClick={handleNavLinkClick} className="btn-primary w-full block text-center py-3">Book now</Link>

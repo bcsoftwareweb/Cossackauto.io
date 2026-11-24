@@ -1,6 +1,62 @@
 -- Run this script in the Supabase SQL Editor.
 create extension if not exists "pgcrypto";
 
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text not null default '',
+  role text not null default 'customer' check (role in ('customer', 'admin')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+revoke all on table public.profiles from public, anon, authenticated;
+grant select on table public.profiles to authenticated;
+grant update (full_name) on table public.profiles to authenticated;
+
+drop policy if exists "Users can read their own profile" on public.profiles;
+create policy "Users can read their own profile"
+  on public.profiles for select to authenticated
+  using (auth.uid() = id);
+
+drop policy if exists "Users can update their own name" on public.profiles;
+create policy "Users can update their own name"
+  on public.profiles for update to authenticated
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+create or replace function public.handle_new_auth_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.profiles (id, full_name, role)
+  values (
+    new.id,
+    coalesce(nullif(new.raw_user_meta_data ->> 'full_name', ''), ''),
+    'customer'
+  );
+  return new;
+end;
+$$;
+
+revoke all on function public.handle_new_auth_user() from public, anon, authenticated;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_auth_user();
+
+insert into public.profiles (id, full_name, role)
+select
+  id,
+  coalesce(nullif(raw_user_meta_data ->> 'full_name', ''), ''),
+  'customer'
+from auth.users
+on conflict (id) do nothing;
+
 create table if not exists public.reservations (
   id uuid primary key default gen_random_uuid(),
   name text not null,
