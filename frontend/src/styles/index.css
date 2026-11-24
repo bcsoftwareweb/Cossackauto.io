@@ -625,16 +625,6 @@ section.hero {
 .about-body p { margin-bottom: 1rem; }
 
 /* Reviews */
-#reviews {
-	padding-bottom: 3rem;
-}
-
-@media (min-width: 1025px) {
-	main:has(#reviews) {
-		padding-bottom: 1.5rem;
-	}
-}
-
 .reviews-empty {
 	margin-top: 2.5rem;
 	padding: 2rem 1.5rem;
@@ -650,9 +640,17 @@ section.hero {
 }
 
 .reviews-carousel {
+	position: relative;
+	top: 20rem;
 	width: 100%;
 	max-width: 19rem;
 	margin: 4rem auto 0;
+}
+
+@media (max-width: 767px) {
+	.reviews-carousel {
+		top: 8rem;
+	}
 }
 
 .review-card,
