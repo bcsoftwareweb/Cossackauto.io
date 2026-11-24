@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabase'
 
+function getReviewsPerPage() {
+  if (typeof window === 'undefined') return 3
+  if (window.matchMedia('(min-width: 1024px)').matches) return 3
+  if (window.matchMedia('(min-width: 640px)').matches) return 2
+  return 1
+}
+
 export default function Reviews() {
   const [reviews, setReviews] = useState([])
-  const [activeReview, setActiveReview] = useState(0)
+  const [reviewsPerPage, setReviewsPerPage] = useState(getReviewsPerPage)
+  const [activePage, setActivePage] = useState(0)
   const [form, setForm] = useState({ name: '', business: '', rating: 0, review: '' })
   const [submitted, setSubmitted] = useState(false)
   const [ratingError, setRatingError] = useState(false)
@@ -11,6 +19,19 @@ export default function Reviews() {
   const [reviewLoadError, setReviewLoadError] = useState('')
   const [reviewSubmitError, setReviewSubmitError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    function updateReviewsPerPage() {
+      setReviewsPerPage(getReviewsPerPage())
+    }
+
+    window.addEventListener('resize', updateReviewsPerPage)
+    return () => window.removeEventListener('resize', updateReviewsPerPage)
+  }, [])
+
+  useEffect(() => {
+    setActivePage(0)
+  }, [reviewsPerPage])
 
   useEffect(() => {
     let active = true
@@ -66,8 +87,14 @@ export default function Reviews() {
     }
   }
 
-  function showReview(index) {
-    setActiveReview((index + reviews.length) % reviews.length)
+  const pageCount = Math.ceil(reviews.length / reviewsPerPage)
+  const visibleReviews = reviews.slice(
+    activePage * reviewsPerPage,
+    (activePage + 1) * reviewsPerPage
+  )
+
+  function showPage(offset) {
+    setActivePage(page => (page + offset + pageCount) % pageCount)
   }
 
   return (
@@ -159,24 +186,32 @@ export default function Reviews() {
             <div className="reviews-empty text-center"><p role="alert">{reviewLoadError}</p></div>
           ) : reviews.length ? (
             <>
-              <article className="review-card">
-                <p className="review-stars" aria-label={`${reviews[activeReview].rating} out of 5 stars`}>
-                  {'★'.repeat(reviews[activeReview].rating)}{'☆'.repeat(5 - reviews[activeReview].rating)}
-                </p>
-                <blockquote>“{reviews[activeReview].review}”</blockquote>
-                <p className="review-author">
-                  {reviews[activeReview].name}
-                  {reviews[activeReview].business && ` · ${reviews[activeReview].business}`}
-                </p>
-              </article>
-              {reviews.length > 1 && (
+              <div className={`reviews-carousel-grid reviews-carousel-grid--${visibleReviews.length}`}>
+                {visibleReviews.map(review => (
+                  <article className="review-card" key={review.id}>
+                    <p className="review-stars" aria-label={`${review.rating} out of 5 stars`}>
+                      {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    </p>
+                    <blockquote>“{review.review}”</blockquote>
+                    <p className="review-author">
+                      {review.name}
+                      {review.business && ` · ${review.business}`}
+                    </p>
+                  </article>
+                ))}
+              </div>
+              {pageCount > 1 && (
                 <div className="review-carousel-controls">
-                  <button type="button" onClick={() => showReview(activeReview - 1)} aria-label="Previous review">
-                    Previous
+                  <button type="button" onClick={() => showPage(-1)} aria-label="Previous reviews">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m15 18-6-6 6-6" />
+                    </svg>
                   </button>
-                  <span>{activeReview + 1} / {reviews.length}</span>
-                  <button type="button" onClick={() => showReview(activeReview + 1)} aria-label="Next review">
-                    Next
+                  <span>{activePage + 1} / {pageCount}</span>
+                  <button type="button" onClick={() => showPage(1)} aria-label="Next reviews">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
                   </button>
                 </div>
               )}

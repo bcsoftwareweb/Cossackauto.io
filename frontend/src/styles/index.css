@@ -732,7 +732,7 @@ section.hero {
 	position: relative;
 	top: 12rem;
 	width: 100%;
-	max-width: 19rem;
+	max-width: 60rem;
 	margin: 4rem auto 0;
 }
 
@@ -740,6 +740,24 @@ section.hero {
 	.reviews-carousel {
 		top: 6rem;
 	}
+}
+
+.reviews-carousel-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1.5rem;
+}
+
+.reviews-carousel-grid--2 {
+	max-width: 40rem;
+	margin-inline: auto;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reviews-carousel-grid--1 {
+	width: min(100%, 19rem);
+	margin-inline: auto;
+	grid-template-columns: 1fr;
 }
 
 .review-card,
@@ -792,13 +810,27 @@ section.hero {
 }
 
 .review-carousel-controls button {
-	border: 0;
-	background: transparent;
+	display: grid;
+	width: 2.5rem;
+	height: 2.5rem;
+	place-items: center;
+	border: 1px solid var(--color-border);
+	border-radius: 50%;
+	background: #fff;
 	color: var(--color-red);
 	font: inherit;
 	font-weight: 600;
 	cursor: pointer;
-	padding: 0.5rem;
+}
+
+.review-carousel-controls svg {
+	width: 1.125rem;
+	height: 1.125rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 2;
 }
 
 .review-form-card {
