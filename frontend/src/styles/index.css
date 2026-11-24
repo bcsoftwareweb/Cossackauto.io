@@ -705,7 +705,9 @@ section.hero {
 }
 
 .review-form-card {
-	margin-top: 2.5rem;
+	max-width: 48rem;
+	margin: 1.5rem auto 0;
+	padding: 1.25rem;
 }
 
 .review-form-card h3 {
@@ -715,7 +717,7 @@ section.hero {
 }
 
 .review-form-intro {
-	margin: 0.5rem 0 2rem;
+	margin: 0.5rem 0 1rem;
 	font-size: 0.875rem;
 	text-align: center;
 }
@@ -736,13 +738,13 @@ section.hero {
 }
 
 .review-rating-star {
-	width: 2.75rem;
-	height: 2.75rem;
+	width: 2.25rem;
+	height: 2.25rem;
 	padding: 0;
 	border: 0;
 	background: transparent;
 	color: rgba(15, 17, 19, 0.28);
-	font-size: 2rem;
+	font-size: 1.625rem;
 	line-height: 1;
 	cursor: pointer;
 }
@@ -765,7 +767,7 @@ section.hero {
 
 .review-form-fields {
 	max-width: 32.5rem;
-	margin: 3.5rem auto 0;
+	margin: 1.25rem auto 0;
 }
 
 .review-line-textarea,
@@ -776,18 +778,18 @@ section.hero {
 	border-bottom: 1px solid var(--color-border-hover);
 	border-radius: 0;
 	background: transparent;
-	padding: 0.875rem 0;
+	padding: 0.625rem 0;
 	color: var(--color-charcoal);
 	font: inherit;
 }
 
 .review-line-textarea {
-	min-height: 7rem;
+	min-height: 5rem;
 	resize: vertical;
 }
 
 .review-line-input {
-	margin-top: 1.5rem;
+	margin-top: 0.75rem;
 }
 
 .review-line-textarea::placeholder,
@@ -807,7 +809,7 @@ section.hero {
 	display: block;
 	width: 7.25rem;
 	min-height: 2.75rem;
-	margin: 2rem 0 0 auto;
+	margin: 1.25rem 0 0 auto;
 	border: 1px solid var(--color-charcoal);
 	border-radius: 7px;
 	background: var(--color-charcoal);
@@ -830,7 +832,7 @@ section.hero {
 
 .review-storage-note,
 .review-success {
-	margin: 1rem 0 0;
+	margin: 0.75rem 0 0;
 	font-size: 0.8125rem;
 }
 
@@ -845,9 +847,12 @@ section.hero {
 }
 
 @media (min-width: 640px) {
-	.review-card,
-	.review-form-card {
+	.review-card {
 		padding: 2rem;
+	}
+
+	.review-form-card {
+		padding: 1.5rem 2rem;
 	}
 }
 
