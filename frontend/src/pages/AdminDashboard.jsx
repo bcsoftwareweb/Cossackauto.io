@@ -249,7 +249,7 @@ function SiteSectionManager({ user }) {
             <>
               {sections.filter(section => section.page_slug !== 'services').map(renderSectionItem)}
               {servicePageSections.length > 0 && (
-                <section className="cms-service-group">
+                <div className="cms-service-group">
                   <button
                     type="button"
                     className="cms-service-group-toggle"
@@ -269,7 +269,7 @@ function SiteSectionManager({ user }) {
                       {servicePageSections.map(renderSectionItem)}
                     </div>
                   )}
-                </section>
+                </div>
               )}
             </>
           ) : (
