@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { supabase } from '../utils/supabase'
 
 export default function Reviews() {
   const [reviews, setReviews] = useState([])
@@ -6,19 +7,63 @@ export default function Reviews() {
   const [form, setForm] = useState({ name: '', business: '', rating: 0, review: '' })
   const [submitted, setSubmitted] = useState(false)
   const [ratingError, setRatingError] = useState(false)
+  const [loadingReviews, setLoadingReviews] = useState(true)
+  const [reviewLoadError, setReviewLoadError] = useState('')
+  const [reviewSubmitError, setReviewSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  function onSubmit(e) {
+  useEffect(() => {
+    let active = true
+
+    async function loadReviews() {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('id, name, business, rating, review')
+          .eq('is_published', true)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        if (active) setReviews(data)
+      } catch (error) {
+        console.error('Loading reviews failed:', error)
+        if (active) setReviewLoadError('Reviews could not be loaded right now. Please try again later.')
+      } finally {
+        if (active) setLoadingReviews(false)
+      }
+    }
+
+    loadReviews()
+    return () => { active = false }
+  }, [])
+
+  async function onSubmit(e) {
     e.preventDefault()
     if (!form.rating) {
       setRatingError(true)
       return
     }
 
-    const newReview = { ...form }
-    setReviews(current => [...current, newReview])
-    setActiveReview(reviews.length)
-    setForm({ name: '', business: '', rating: 0, review: '' })
-    setSubmitted(true)
+    setSubmitting(true)
+    setSubmitted(false)
+    setReviewSubmitError('')
+    try {
+      const { error } = await supabase.from('reviews').insert({
+        name: form.name.trim(),
+        business: form.business.trim() || null,
+        rating: form.rating,
+        review: form.review.trim(),
+      })
+      if (error) throw error
+
+      setForm({ name: '', business: '', rating: 0, review: '' })
+      setSubmitted(true)
+    } catch (error) {
+      console.error('Review submission failed:', error)
+      setReviewSubmitError('Your review could not be submitted. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function showReview(index) {
@@ -35,7 +80,11 @@ export default function Reviews() {
         </div>
 
         <div className="reviews-carousel" aria-live="polite">
-          {reviews.length ? (
+          {loadingReviews ? (
+            <div className="reviews-empty text-center"><p>Loading reviews...</p></div>
+          ) : reviewLoadError ? (
+            <div className="reviews-empty text-center"><p role="alert">{reviewLoadError}</p></div>
+          ) : reviews.length ? (
             <>
               <article className="review-card">
                 <p className="review-stars" aria-label={`${reviews[activeReview].rating} out of 5 stars`}>
@@ -126,11 +175,14 @@ export default function Reviews() {
                   onChange={e => setForm(current => ({ ...current, business: e.target.value }))}
                   autoComplete="organization"
                 />
-                <button type="submit" className="review-post-button">Post</button>
                 <p className="review-storage-note">
-                  Reviews submitted here appear in this carousel during this visit only. Shared, persistent reviews will be available after Supabase is connected.
+                  New reviews are saved and held for approval before they appear publicly.
                 </p>
-                {submitted && <p className="review-success" role="status">Thanks for sharing your experience!</p>}
+                {submitted && <p className="review-success" role="status">Thanks! Your review was received and will appear after approval.</p>}
+                {reviewSubmitError && <p className="review-rating-error" role="alert">{reviewSubmitError}</p>}
+                <button type="submit" className="review-post-button" disabled={submitting}>
+                  {submitting ? 'Submitting...' : 'Post'}
+                </button>
               </div>
             </div>
           </form>

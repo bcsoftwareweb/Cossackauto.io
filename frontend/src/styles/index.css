@@ -79,9 +79,7 @@ section {
 	}
 }
 
-section.hero,
-section.home-landing,
-section.trust-strip {
+section.hero {
 	padding-top: 0;
 	padding-bottom: 0;
 }
@@ -387,7 +385,11 @@ section.trust-strip {
 
 /* Home landing */
 .home-landing {
-	padding: 4.5rem 0 5rem;
+	display: grid;
+	align-items: center;
+	min-height: calc(100vh - var(--header-h-mobile));
+	min-height: calc(100svh - var(--header-h-mobile));
+	padding: 2rem 0;
 	background:
 		radial-gradient(ellipse 80% 50% at 50% -10%, rgba(142, 15, 24, 0.06), transparent 55%),
 		var(--color-offwhite);
@@ -395,8 +397,14 @@ section.trust-strip {
 
 @media (min-width: 768px) {
 	.home-landing {
-		padding: 6.5rem 0 7rem;
+		min-height: calc(100vh - var(--header-h-desktop));
+		min-height: calc(100svh - var(--header-h-desktop));
 	}
+}
+
+.trust-strip {
+	padding: 3rem 0;
+	background: var(--color-surface);
 }
 
 .hero-block {
@@ -468,14 +476,12 @@ section.trust-strip {
 }
 
 .trust-grid {
-	margin-top: 4.5rem;
 	display: grid;
 	gap: 1.25rem;
 }
 
 @media (min-width: 768px) {
 	.trust-grid {
-		margin-top: 6rem;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 1.5rem;
 	}

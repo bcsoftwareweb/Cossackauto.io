@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
+import { supabase } from '../utils/supabase'
+
+const MAX_PHOTO_SIZE = 10 * 1024 * 1024
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
 
 export default function Reservation() {
   const [form, setForm] = useState({ year: '', make: '', model: '', name: '', email: '', contact: '', servicesNeeded: '', description: '' })
   const [fileName, setFileName] = useState('No file chosen')
   const [file, setFile] = useState(null)
+  const [fileError, setFileError] = useState('')
   const [status, setStatus] = useState(null)
+  const [submissionError, setSubmissionError] = useState('')
   const [errors, setErrors] = useState({})
   const validationTimers = useRef({})
 
@@ -26,8 +32,28 @@ export default function Reservation() {
 
   function onFileChange(e){
     const f = e.target.files[0]
-    if(f) { setFileName(f.name); setFile(f) }
-    else { setFileName('No file chosen'); setFile(null) }
+    setFileError('')
+    if (!f) {
+      setFileName('No file chosen')
+      setFile(null)
+      return
+    }
+    if (!PHOTO_TYPES.includes(f.type)) {
+      setFileError('Choose a JPG, PNG, WebP, GIF, HEIC, or HEIF image.')
+      setFileName('No file chosen')
+      setFile(null)
+      e.target.value = ''
+      return
+    }
+    if (f.size > MAX_PHOTO_SIZE) {
+      setFileError('Choose an image smaller than 10 MB.')
+      setFileName('No file chosen')
+      setFile(null)
+      e.target.value = ''
+      return
+    }
+    setFileName(f.name)
+    setFile(f)
   }
 
   // Field validators
@@ -111,6 +137,7 @@ export default function Reservation() {
 
   async function onSubmit(e) {
     e.preventDefault()
+    if (fileError) return
     // validate all fields (sets `errors` state)
     if (!validateAll()){
       // focus first invalid field
@@ -121,57 +148,40 @@ export default function Reservation() {
     }
 
     setStatus('sending')
+    setSubmissionError('')
     try {
-      // Construct payload expected by backend
-      const payload = {
-        name: form.name,
-        email: form.email,
-        phone: form.contact,
-        vehicle: `${form.year} ${form.make} ${form.model}`.trim(),
-        date: null,
-        notes: `${form.servicesNeeded}\n\n${form.description}`
+      let photoPath = null
+      if (file) {
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        photoPath = `${crypto.randomUUID()}/${safeFileName}`
+        const { error: uploadError } = await supabase.storage
+          .from('reservation-photos')
+          .upload(photoPath, file, { contentType: file.type, upsert: false })
+        if (uploadError) throw uploadError
       }
 
-      // Attempt to POST to backend; if backend unreachable, fall back to simulated success
-      let ok = false
-      try{
-        let res
-        if (file) {
-          const fd = new FormData()
-          fd.append('picture', file)
-          fd.append('name', payload.name)
-          fd.append('email', payload.email)
-          fd.append('phone', payload.phone)
-          fd.append('vehicle', payload.vehicle)
-          fd.append('date', payload.date)
-          fd.append('notes', payload.notes)
-          res = await fetch('http://localhost:4000/api/reservations', { method: 'POST', body: fd })
-        } else {
-          res = await fetch('http://localhost:4000/api/reservations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-        }
-        if (res.ok) {
-          ok = true
-        } else {
-          // try to read JSON error details and display per-field messages
-          const data = await res.json().catch(()=>null)
-          if (data && data.errors) {
-            setErrors(prev => ({ ...prev, ...data.errors }))
-            setStatus('error')
-            return
-          }
-        }
-      }catch(_){ ok = false }
-
-      if (!ok){
-        // fallback: simulate network submission so UI still behaves
-        await new Promise(r=>setTimeout(r,700))
-      }
+      const { error: reservationError } = await supabase
+        .from('reservations')
+        .insert({
+          name: form.name,
+          email: form.email,
+          phone: form.contact,
+          vehicle: `${form.year} ${form.make} ${form.model}`.trim(),
+          date: null,
+          notes: `${form.servicesNeeded}\n\n${form.description}`,
+          photo_path: photoPath,
+        })
+      if (reservationError) throw reservationError
 
       setStatus('sent')
       setForm({ year: '', make: '', model: '', name: '', email: '', contact: '', servicesNeeded: '', description: '' })
       setFileName('No file chosen')
+      setFile(null)
+      setFileError('')
       setErrors({})
     } catch (err) {
+      console.error('Reservation submission failed:', err)
+      setSubmissionError('We could not submit your request. Please try again or call us directly.')
       setStatus('error')
     }
   }
@@ -336,15 +346,18 @@ export default function Reservation() {
         <label className="reservation-label">Picture (optional)</label>
         <div className="file-chooser mt-2">
           <label className="choose-btn" htmlFor="fileInput">Choose file</label>
-          <input id="fileInput" type="file" onChange={onFileChange} style={{display:'none'}} />
+          <input id="fileInput" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif" onChange={onFileChange} style={{display:'none'}} />
           <div className="file-name">{fileName}</div>
         </div>
+        {fileError && <p role="alert" className="text-red-700">{fileError}</p>}
       </div>
 
       <div className="mt-8">
         <button type="submit" className="submit-reservation" disabled={status==='sending'}>
           {status === 'sending' ? 'Submitting...' : 'Submit reservation'}
         </button>
+        {status === 'sent' && <p role="status">Your request was submitted successfully. We will be in touch to confirm your appointment.</p>}
+        {status === 'error' && <p role="alert" className="text-red-700">{submissionError}</p>}
       </div>
       </form>
     </div>
