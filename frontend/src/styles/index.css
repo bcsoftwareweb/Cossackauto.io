@@ -1068,6 +1068,55 @@ section.hero {
 	gap: 0.75rem;
 }
 
+.cms-service-group {
+	overflow: hidden;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+}
+
+.cms-service-group-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+	padding: 1rem;
+	border: 0;
+	background: #fff;
+	text-align: left;
+	cursor: pointer;
+}
+
+.cms-service-group-toggle:hover {
+	background: var(--color-surface);
+}
+
+.cms-service-group-heading {
+	display: grid;
+	gap: 0.25rem;
+}
+
+.cms-service-group-chevron {
+	width: 0.55rem;
+	height: 0.55rem;
+	flex: none;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(45deg);
+	transition: transform 0.15s ease;
+}
+
+.cms-service-group-toggle[aria-expanded="true"] .cms-service-group-chevron {
+	transform: rotate(225deg);
+}
+
+.cms-service-group-items {
+	display: grid;
+	gap: 0.75rem;
+	padding: 0 0.75rem 0.75rem;
+}
+
 .cms-item {
 	display: flex;
 	align-items: center;

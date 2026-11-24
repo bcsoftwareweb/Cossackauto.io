@@ -81,6 +81,7 @@ function SiteSectionManager({ user }) {
   const [loadError, setLoadError] = useState('')
   const [formError, setFormError] = useState('')
   const [message, setMessage] = useState('')
+  const [servicesExpanded, setServicesExpanded] = useState(false)
 
   async function loadSections() {
     setLoading(true)
@@ -199,6 +200,33 @@ function SiteSectionManager({ user }) {
     }
   }
 
+  function renderSectionItem(section) {
+    return (
+      <article className={`cms-item ${editingId === section.id ? 'is-selected' : ''}`} key={section.id}>
+        <button type="button" className="cms-item-select" onClick={() => startEditing(section)}>
+          <span className="cms-item-title">
+            {section.page_slug === 'services' && section.section_type === 'intro'
+              ? 'Services page introduction'
+              : section.title || 'Untitled section'}
+          </span>
+          <span className="cms-item-meta">
+            {SITE_PAGES.find(page => page.value === section.page_slug)?.label ?? section.page_slug}
+            {' · '}{section.section_type}
+            {' · '}{section.is_published ? 'Published' : 'Draft'}
+          </span>
+        </button>
+        {!['hero', 'intro', 'profile'].includes(section.section_type) && (
+          <button type="button" className="cms-item-delete" onClick={() => deleteSection(section)}>
+            Delete
+          </button>
+        )}
+      </article>
+    )
+  }
+
+  const servicePageSections = sections.filter(section => section.page_slug === 'services')
+  const serviceCount = servicePageSections.filter(section => section.section_type === 'service').length
+
   return (
     <div className="cms-manager">
       <div className="cms-manager-heading">
@@ -217,23 +245,34 @@ function SiteSectionManager({ user }) {
         <div className="cms-item-list" aria-label="Existing website sections">
           {loading ? (
             <p role="status">Loading sections...</p>
-          ) : sections.length ? sections.map(section => (
-            <article className={`cms-item ${editingId === section.id ? 'is-selected' : ''}`} key={section.id}>
-              <button type="button" className="cms-item-select" onClick={() => startEditing(section)}>
-                <span className="cms-item-title">{section.title || 'Untitled section'}</span>
-                <span className="cms-item-meta">
-                  {SITE_PAGES.find(page => page.value === section.page_slug)?.label ?? section.page_slug}
-                  {' · '}{section.section_type}
-                  {' · '}{section.is_published ? 'Published' : 'Draft'}
-                </span>
-              </button>
-              {!['hero', 'intro', 'profile'].includes(section.section_type) && (
-                <button type="button" className="cms-item-delete" onClick={() => deleteSection(section)}>
-                  Delete
-                </button>
+          ) : sections.length ? (
+            <>
+              {sections.filter(section => section.page_slug !== 'services').map(renderSectionItem)}
+              {servicePageSections.length > 0 && (
+                <section className="cms-service-group">
+                  <button
+                    type="button"
+                    className="cms-service-group-toggle"
+                    aria-expanded={servicesExpanded}
+                    onClick={() => setServicesExpanded(expanded => !expanded)}
+                  >
+                    <span className="cms-service-group-heading">
+                      <span className="cms-item-title">Services</span>
+                      <span className="cms-item-meta">
+                        {serviceCount} {serviceCount === 1 ? 'service card' : 'service cards'}
+                      </span>
+                    </span>
+                    <span className="cms-service-group-chevron" aria-hidden="true" />
+                  </button>
+                  {servicesExpanded && (
+                    <div className="cms-service-group-items" id="cms-services-sections">
+                      {servicePageSections.map(renderSectionItem)}
+                    </div>
+                  )}
+                </section>
               )}
-            </article>
-          )) : (
+            </>
+          ) : (
             <p>No website sections exist yet.</p>
           )}
         </div>
