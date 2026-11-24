@@ -85,7 +85,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="footer-col">
+          <div className="footer-col footer-hours-col">
             <h2 className="footer-heading">Hours</h2>
             <ul className="footer-hours">
               <li><span>Mon – Fri</span><span>8:00 AM – 6:00 PM</span></li>
