@@ -17,6 +17,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
   const [userId, setUserId] = useState(null)
+  const [profileRole, setProfileRole] = useState('')
   const timeoutRef = useRef(null)
 
   const openMenu = () => {
@@ -64,6 +65,32 @@ export default function Navbar() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!userId) {
+      setProfileRole('')
+      return
+    }
+
+    let active = true
+
+    async function loadProfileRole() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .maybeSingle()
+        if (error) throw error
+        if (active) setProfileRole(data?.role ?? '')
+      } catch (error) {
+        if (active) console.error('Loading navbar profile role failed:', error)
+      }
+    }
+
+    loadProfileRole()
+    return () => { active = false }
+  }, [userId])
+
   const handleNavLinkClick = () => {
     closeMenu()
   }
@@ -108,6 +135,9 @@ export default function Navbar() {
             </ul>
             <div className="mobile-nav-actions p-4 border-t border-white/5">
               <Link to="/reservation" onClick={handleNavLinkClick} className="btn-primary flex-1 text-center py-3">Book now</Link>
+              {profileRole === 'admin' && (
+                <Link to="/admin" onClick={handleNavLinkClick} className="account-cta">Dashboard</Link>
+              )}
               <Link to="/account" onClick={handleNavLinkClick} className="account-cta" aria-label="Account">
                 <SignInIcon />
                 <span>Account</span>
@@ -118,6 +148,9 @@ export default function Navbar() {
 
         <div className="hidden lg:flex items-center ml-4 header-cta">
           <Link to="/reservation" className="btn-primary">Book now</Link>
+          {profileRole === 'admin' && (
+            <Link to="/admin" className="account-cta">Dashboard</Link>
+          )}
           <Link to="/account" className="account-cta" aria-label="Account">
             <SignInIcon />
             <span>Account</span>
