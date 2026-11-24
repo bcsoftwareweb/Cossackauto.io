@@ -1316,6 +1316,11 @@ section.hero {
 	gap: 1rem;
 }
 
+.cms-review-view-more {
+	display: block;
+	margin: 1rem auto 0;
+}
+
 .cms-review-card {
 	padding: 1.25rem;
 	border: 1px solid var(--color-border);

@@ -507,6 +507,7 @@ function CustomerUpdateManager({ user }) {
 
 function ReviewManager() {
   const [reviews, setReviews] = useState([])
+  const [visibleReviewCount, setVisibleReviewCount] = useState(3)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [actionError, setActionError] = useState('')
@@ -586,39 +587,50 @@ function ReviewManager() {
       ) : loadError ? (
         <button type="button" className="btn-secondary" onClick={loadReviews}>Try again</button>
       ) : reviews.length ? (
-        <div className="cms-review-list">
-          {reviews.map(review => (
-            <article className="cms-review-card" key={review.id}>
-              <div className="cms-review-card-header">
-                <div>
-                  <p className="cms-review-rating" aria-label={`${review.rating} out of 5 stars`}>
-                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                  </p>
-                  <p className="cms-item-meta">
-                    {review.name}{review.business ? ` · ${review.business}` : ''}
-                  </p>
+        <>
+          <div className="cms-review-list">
+            {reviews.slice(0, visibleReviewCount).map(review => (
+              <article className="cms-review-card" key={review.id}>
+                <div className="cms-review-card-header">
+                  <div>
+                    <p className="cms-review-rating" aria-label={`${review.rating} out of 5 stars`}>
+                      {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    </p>
+                    <p className="cms-item-meta">
+                      {review.name}{review.business ? ` · ${review.business}` : ''}
+                    </p>
+                  </div>
+                  <span className={`cms-review-status ${review.is_published ? 'is-published' : 'is-pending'}`}>
+                    {review.is_published ? 'Published' : 'Needs approval'}
+                  </span>
                 </div>
-                <span className={`cms-review-status ${review.is_published ? 'is-published' : 'is-pending'}`}>
-                  {review.is_published ? 'Published' : 'Needs approval'}
-                </span>
-              </div>
-              <blockquote>{review.review}</blockquote>
-              <div className="cms-review-card-footer">
-                <time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
-                <button
-                  type="button"
-                  className={review.is_published ? 'btn-secondary' : 'btn-primary'}
-                  onClick={() => setReviewPublished(review, !review.is_published)}
-                  disabled={moderatingId !== null}
-                >
-                  {moderatingId === review.id
-                    ? 'Saving...'
-                    : review.is_published ? 'Remove from site' : 'Approve review'}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <blockquote>{review.review}</blockquote>
+                <div className="cms-review-card-footer">
+                  <time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
+                  <button
+                    type="button"
+                    className={review.is_published ? 'btn-secondary' : 'btn-primary'}
+                    onClick={() => setReviewPublished(review, !review.is_published)}
+                    disabled={moderatingId !== null}
+                  >
+                    {moderatingId === review.id
+                      ? 'Saving...'
+                      : review.is_published ? 'Remove from site' : 'Approve review'}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+          {reviews.length > visibleReviewCount && (
+            <button
+              type="button"
+              className="btn-secondary cms-review-view-more"
+              onClick={() => setVisibleReviewCount(count => count + 3)}
+            >
+              View More
+            </button>
+          )}
+        </>
       ) : (
         <div className="cms-empty-state">
           <p>No reviews have been submitted yet.</p>
