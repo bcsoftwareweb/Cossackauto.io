@@ -480,18 +480,22 @@ export default function AdminDashboard({ user, onSignOut }) {
         <button type="button" className="btn-secondary" onClick={onSignOut}>Sign out</button>
       </header>
 
-      <div className="cms-admin-tabs" role="tablist" aria-label="Dashboard tools">
-        <button type="button" role="tab" aria-selected={tab === 'content'} className={tab === 'content' ? 'is-active' : ''} onClick={() => setTab('content')}>
-          Website content
-        </button>
-        <button type="button" role="tab" aria-selected={tab === 'updates'} className={tab === 'updates' ? 'is-active' : ''} onClick={() => setTab('updates')}>
-          Customer updates
-        </button>
-      </div>
+      <div className="cms-dashboard-layout">
+        <nav className="cms-sidebar" aria-label="Dashboard navigation">
+          <button type="button" aria-current={tab === 'content' ? 'page' : undefined} className={tab === 'content' ? 'is-active' : ''} onClick={() => setTab('content')}>
+            Manage Content
+          </button>
+          <button type="button" aria-current={tab === 'updates' ? 'page' : undefined} className={tab === 'updates' ? 'is-active' : ''} onClick={() => setTab('updates')}>
+            Customer Updates
+          </button>
+        </nav>
 
-      {tab === 'content'
-        ? <SiteSectionManager user={user} />
-        : <CustomerUpdateManager user={user} />}
+        <div className="cms-dashboard-main">
+          {tab === 'content'
+            ? <SiteSectionManager user={user} />
+            : <CustomerUpdateManager user={user} />}
+        </div>
+      </div>
     </section>
   )
 }

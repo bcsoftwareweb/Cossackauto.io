@@ -17,7 +17,6 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
   const [userId, setUserId] = useState(null)
-  const [profileRole, setProfileRole] = useState('')
   const timeoutRef = useRef(null)
 
   const openMenu = () => {
@@ -65,32 +64,6 @@ export default function Navbar() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!userId) {
-      setProfileRole('')
-      return
-    }
-
-    let active = true
-
-    async function loadProfileRole() {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', userId)
-          .maybeSingle()
-        if (error) throw error
-        if (active) setProfileRole(data?.role ?? '')
-      } catch (error) {
-        if (active) console.error('Loading navbar profile role failed:', error)
-      }
-    }
-
-    loadProfileRole()
-    return () => { active = false }
-  }, [userId])
-
   const handleNavLinkClick = () => {
     closeMenu()
   }
@@ -102,7 +75,6 @@ export default function Navbar() {
     { to: '/reviews', label: 'Reviews' },
     { to: '/reservation', label: 'Reservation' },
     ...(userId ? [{ to: '/updates', label: 'Updates' }] : []),
-    ...(profileRole === 'admin' ? [{ to: '/admin', label: 'Manage site' }] : []),
   ]
 
   return (
