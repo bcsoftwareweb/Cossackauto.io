@@ -39,4 +39,4 @@ cd frontend
 npm run build
 ```
 
-For GitHub Pages builds, provide `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the build environment. The browser bundle necessarily contains the publishable key; database access must remain constrained by the policies in `schema.sql`.
+For GitHub Pages builds, the workflow reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the repository's Actions variables. The browser bundle necessarily contains the publishable key; database access must remain constrained by the policies in `schema.sql`.
