@@ -88,6 +88,33 @@ $$;
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;
 
+create or replace function public.admin_list_customers()
+returns table (
+  id uuid,
+  full_name text,
+  email text,
+  created_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    u.id,
+    coalesce(p.full_name, ''),
+    u.email::text,
+    u.created_at
+  from auth.users as u
+  join public.profiles as p on p.id = u.id
+  where public.is_admin()
+    and p.role = 'customer'
+  order by u.created_at desc;
+$$;
+
+revoke all on function public.admin_list_customers() from public, anon;
+grant execute on function public.admin_list_customers() to authenticated;
+
 create table if not exists public.site_sections (
   id uuid primary key default gen_random_uuid(),
   page_slug text not null check (page_slug in ('home', 'about', 'services', 'reviews', 'reservation')),

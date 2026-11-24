@@ -628,6 +628,77 @@ function ReviewManager() {
   )
 }
 
+function CustomerManager() {
+  const [customers, setCustomers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+
+  async function loadCustomers() {
+    setLoading(true)
+    setLoadError('')
+    try {
+      const { data, error } = await supabase.rpc('admin_list_customers')
+      if (error) throw error
+      setCustomers(data ?? [])
+    } catch (error) {
+      console.error('Loading registered customers failed:', error)
+      setLoadError(error.message || 'The customer list could not be loaded.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { loadCustomers() }, [])
+
+  return (
+    <div className="cms-customer-manager">
+      <div className="cms-manager-heading">
+        <div>
+          <h2>Registered customers</h2>
+          <p>People who have created an account on your website.</p>
+        </div>
+        <span className="cms-review-pending-count">
+          {loading
+            ? 'Loading customer list...'
+            : loadError
+              ? 'Customer count unavailable'
+              : `${customers.length} ${customers.length === 1 ? 'customer' : 'customers'}`}
+        </span>
+      </div>
+
+      {loadError && <p className="account-message account-message--error" role="alert">{loadError}</p>}
+
+      {loading ? (
+        <p role="status">Loading customers...</p>
+      ) : loadError ? (
+        <button type="button" className="btn-secondary" onClick={loadCustomers}>Try again</button>
+      ) : customers.length ? (
+        <div className="cms-customer-list">
+          {customers.map(customer => (
+            <article className="cms-customer-card" key={customer.id}>
+              <div>
+                <p className="cms-customer-name">{customer.full_name || 'Name not provided'}</p>
+                {customer.email ? (
+                  <a className="cms-customer-email" href={`mailto:${customer.email}`}>{customer.email}</a>
+                ) : (
+                  <p className="cms-customer-email">Email unavailable</p>
+                )}
+              </div>
+              <p className="cms-customer-joined">
+                Joined {new Date(customer.created_at).toLocaleDateString()}
+              </p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="cms-empty-state">
+          <p>No customer accounts have been created yet.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AdminDashboard({ user, onSignOut }) {
   const [tab, setTab] = useState('content')
 
@@ -653,6 +724,9 @@ export default function AdminDashboard({ user, onSignOut }) {
           <button type="button" aria-current={tab === 'reviews' ? 'page' : undefined} className={tab === 'reviews' ? 'is-active' : ''} onClick={() => setTab('reviews')}>
             Review Approvals
           </button>
+          <button type="button" aria-current={tab === 'customers' ? 'page' : undefined} className={tab === 'customers' ? 'is-active' : ''} onClick={() => setTab('customers')}>
+            Customers
+          </button>
         </nav>
 
         <div className="cms-dashboard-main">
@@ -660,7 +734,9 @@ export default function AdminDashboard({ user, onSignOut }) {
             ? <SiteSectionManager user={user} />
             : tab === 'updates'
               ? <CustomerUpdateManager user={user} />
-              : <ReviewManager />}
+              : tab === 'reviews'
+                ? <ReviewManager />
+                : <CustomerManager />}
         </div>
       </div>
     </section>

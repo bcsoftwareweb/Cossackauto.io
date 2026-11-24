@@ -1367,6 +1367,41 @@ section.hero {
 	font-size: 0.8125rem;
 }
 
+.cms-customer-list {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.cms-customer-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+}
+
+.cms-customer-name {
+	margin: 0;
+	color: var(--color-charcoal);
+	font-weight: 600;
+}
+
+.cms-customer-email {
+	display: inline-block;
+	margin: 0.25rem 0 0;
+	font-size: 0.875rem;
+	overflow-wrap: anywhere;
+}
+
+.cms-customer-joined {
+	margin: 0;
+	font-size: 0.8125rem;
+	white-space: nowrap;
+}
+
 @media (max-width: 760px) {
 	.cms-admin-header,
 	.cms-manager-heading {
@@ -1395,6 +1430,11 @@ section.hero {
 
 	.cms-review-card-header,
 	.cms-review-card-footer {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.cms-customer-card {
 		align-items: flex-start;
 		flex-direction: column;
 	}
