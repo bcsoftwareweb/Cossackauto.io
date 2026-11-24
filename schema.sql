@@ -271,7 +271,9 @@ alter table public.reviews enable row level security;
 
 revoke all on table public.reviews from public, anon, authenticated;
 grant select on table public.reviews to anon;
+grant select on table public.reviews to authenticated;
 grant insert (name, business, rating, review) on table public.reviews to anon;
+grant update (is_published) on table public.reviews to authenticated;
 
 drop policy if exists "Anyone can read published reviews" on public.reviews;
 create policy "Anyone can read published reviews"
@@ -282,6 +284,17 @@ drop policy if exists "Anyone can submit reviews for approval" on public.reviews
 create policy "Anyone can submit reviews for approval"
   on public.reviews for insert to anon
   with check (is_published = false);
+
+drop policy if exists "Admins can read all reviews" on public.reviews;
+create policy "Admins can read all reviews"
+  on public.reviews for select to authenticated
+  using (public.is_admin());
+
+drop policy if exists "Admins can moderate reviews" on public.reviews;
+create policy "Admins can moderate reviews"
+  on public.reviews for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 insert into storage.buckets (
   id,

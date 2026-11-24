@@ -38,9 +38,9 @@ where id = (
 
 The profile table only lets a signed-in user read their own profile and update their name. It does not allow users to change their role. Admin access changes must be made by a trusted project owner.
 
-The admin dashboard edits page headings, the home hero, the About profile, service cards, and custom text/image sections. It can also publish customer updates. Published site sections are public; published customer updates are visible only to signed-in users at `/#/updates`. The database policies—not hidden routes or UI controls—enforce these access rules.
+The admin dashboard edits page headings, the home hero, the About profile, service cards, and custom text/image sections. It can also publish customer updates and approve or unpublish customer reviews. Published site sections are public; published customer updates are visible only to signed-in users at `/#/updates`. The database policies—not hidden routes or UI controls—enforce these access rules.
 
-New reviews have `is_published = false`. To approve a review, use the Supabase Dashboard or SQL Editor to set that row's `is_published` value to `true`. For example:
+New reviews have `is_published = false` and stay hidden until approved in the admin dashboard. To approve a review manually instead, use the Supabase SQL Editor:
 
 ```sql
 update public.reviews

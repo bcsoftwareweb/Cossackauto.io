@@ -505,6 +505,129 @@ function CustomerUpdateManager({ user }) {
   )
 }
 
+function ReviewManager() {
+  const [reviews, setReviews] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [actionError, setActionError] = useState('')
+  const [message, setMessage] = useState('')
+  const [moderatingId, setModeratingId] = useState(null)
+
+  async function loadReviews() {
+    setLoading(true)
+    setLoadError('')
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('id, name, business, rating, review, is_published, created_at')
+        .order('is_published', { ascending: true })
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setReviews(data ?? [])
+    } catch (error) {
+      console.error('Loading reviews for moderation failed:', error)
+      setLoadError(error.message || 'Reviews could not be loaded.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { loadReviews() }, [])
+
+  async function setReviewPublished(review, isPublished) {
+    setModeratingId(review.id)
+    setActionError('')
+    setMessage('')
+
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ is_published: isPublished })
+        .eq('id', review.id)
+
+      if (error) throw error
+      setReviews(current => current.map(item =>
+        item.id === review.id ? { ...item, is_published: isPublished } : item
+      ))
+      setMessage(isPublished ? 'Review approved and published.' : 'Review removed from the website.')
+    } catch (error) {
+      console.error('Updating review approval failed:', error)
+      setActionError(error.message || 'The review approval status could not be changed.')
+    } finally {
+      setModeratingId(null)
+    }
+  }
+
+  const pendingCount = reviews.filter(review => !review.is_published).length
+
+  return (
+    <div className="cms-review-manager">
+      <div className="cms-manager-heading">
+        <div>
+          <h2>Review approvals</h2>
+          <p>Approve customer reviews before they appear on the website.</p>
+        </div>
+        <span className="cms-review-pending-count">
+          {loading
+            ? 'Loading review count...'
+            : loadError
+              ? 'Review count unavailable'
+              : `${pendingCount} ${pendingCount === 1 ? 'review' : 'reviews'} awaiting approval`}
+        </span>
+      </div>
+
+      {loadError && <p className="account-message account-message--error" role="alert">{loadError}</p>}
+      {actionError && <p className="account-message account-message--error" role="alert">{actionError}</p>}
+      {message && <p className="account-message" role="status">{message}</p>}
+
+      {loading ? (
+        <p role="status">Loading reviews...</p>
+      ) : loadError ? (
+        <button type="button" className="btn-secondary" onClick={loadReviews}>Try again</button>
+      ) : reviews.length ? (
+        <div className="cms-review-list">
+          {reviews.map(review => (
+            <article className="cms-review-card" key={review.id}>
+              <div className="cms-review-card-header">
+                <div>
+                  <p className="cms-review-rating" aria-label={`${review.rating} out of 5 stars`}>
+                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                  </p>
+                  <p className="cms-item-meta">
+                    {review.name}{review.business ? ` · ${review.business}` : ''}
+                  </p>
+                </div>
+                <span className={`cms-review-status ${review.is_published ? 'is-published' : 'is-pending'}`}>
+                  {review.is_published ? 'Published' : 'Needs approval'}
+                </span>
+              </div>
+              <blockquote>{review.review}</blockquote>
+              <div className="cms-review-card-footer">
+                <time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
+                <button
+                  type="button"
+                  className={review.is_published ? 'btn-secondary' : 'btn-primary'}
+                  onClick={() => setReviewPublished(review, !review.is_published)}
+                  disabled={moderatingId !== null}
+                >
+                  {moderatingId === review.id
+                    ? 'Saving...'
+                    : review.is_published ? 'Remove from site' : 'Approve review'}
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="cms-empty-state">
+          <p>No reviews have been submitted yet.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AdminDashboard({ user, onSignOut }) {
   const [tab, setTab] = useState('content')
 
@@ -527,12 +650,17 @@ export default function AdminDashboard({ user, onSignOut }) {
           <button type="button" aria-current={tab === 'updates' ? 'page' : undefined} className={tab === 'updates' ? 'is-active' : ''} onClick={() => setTab('updates')}>
             Customer Updates
           </button>
+          <button type="button" aria-current={tab === 'reviews' ? 'page' : undefined} className={tab === 'reviews' ? 'is-active' : ''} onClick={() => setTab('reviews')}>
+            Review Approvals
+          </button>
         </nav>
 
         <div className="cms-dashboard-main">
           {tab === 'content'
             ? <SiteSectionManager user={user} />
-            : <CustomerUpdateManager user={user} />}
+            : tab === 'updates'
+              ? <CustomerUpdateManager user={user} />
+              : <ReviewManager />}
         </div>
       </div>
     </section>

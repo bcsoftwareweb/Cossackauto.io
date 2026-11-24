@@ -1305,6 +1305,68 @@ section.hero {
 	font-size: 0.8125rem;
 }
 
+.cms-review-pending-count {
+	color: var(--color-muted);
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.cms-review-list {
+	display: grid;
+	gap: 1rem;
+}
+
+.cms-review-card {
+	padding: 1.25rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+	box-shadow: var(--shadow-sm);
+}
+
+.cms-review-card-header,
+.cms-review-card-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.cms-review-rating {
+	margin: 0 0 0.25rem;
+	color: #a86e00;
+	letter-spacing: 0.08em;
+}
+
+.cms-review-card blockquote {
+	margin: 1rem 0;
+	color: var(--color-charcoal);
+	white-space: pre-wrap;
+}
+
+.cms-review-status {
+	padding: 0.3rem 0.6rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.cms-review-status.is-pending {
+	background: #fff4d6;
+	color: #795300;
+}
+
+.cms-review-status.is-published {
+	background: #e8f5ec;
+	color: #23613b;
+}
+
+.cms-review-card-footer time {
+	color: var(--color-muted);
+	font-size: 0.8125rem;
+}
+
 @media (max-width: 760px) {
 	.cms-admin-header,
 	.cms-manager-heading {
@@ -1329,6 +1391,12 @@ section.hero {
 
 	.cms-manager-layout {
 		grid-template-columns: 1fr;
+	}
+
+	.cms-review-card-header,
+	.cms-review-card-footer {
+		align-items: flex-start;
+		flex-direction: column;
 	}
 }
 
