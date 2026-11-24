@@ -79,42 +79,6 @@ export default function Reviews() {
           <p className="page-header-lead">We'd love to hear about your experience with Cossack Auto Solutions.</p>
         </div>
 
-        <div className="reviews-carousel" aria-live="polite">
-          {loadingReviews ? (
-            <div className="reviews-empty text-center"><p>Loading reviews...</p></div>
-          ) : reviewLoadError ? (
-            <div className="reviews-empty text-center"><p role="alert">{reviewLoadError}</p></div>
-          ) : reviews.length ? (
-            <>
-              <article className="review-card">
-                <p className="review-stars" aria-label={`${reviews[activeReview].rating} out of 5 stars`}>
-                  {'★'.repeat(reviews[activeReview].rating)}{'☆'.repeat(5 - reviews[activeReview].rating)}
-                </p>
-                <blockquote>“{reviews[activeReview].review}”</blockquote>
-                <p className="review-author">
-                  {reviews[activeReview].name}
-                  {reviews[activeReview].business && ` · ${reviews[activeReview].business}`}
-                </p>
-              </article>
-              {reviews.length > 1 && (
-                <div className="review-carousel-controls">
-                  <button type="button" onClick={() => showReview(activeReview - 1)} aria-label="Previous review">
-                    Previous
-                  </button>
-                  <span>{activeReview + 1} / {reviews.length}</span>
-                  <button type="button" onClick={() => showReview(activeReview + 1)} aria-label="Next review">
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="reviews-empty text-center">
-              <p>Be the first to share your experience.</p>
-            </div>
-          )}
-        </div>
-
         <div className="review-form-card">
           <h3>Share your experience with us</h3>
           <p className="review-form-intro">Tell others what it was like working with Cossack Auto Solutions.</p>
@@ -186,6 +150,42 @@ export default function Reviews() {
               </div>
             </div>
           </form>
+        </div>
+
+        <div className="reviews-carousel" aria-live="polite">
+          {loadingReviews ? (
+            <div className="reviews-empty text-center"><p>Loading reviews...</p></div>
+          ) : reviewLoadError ? (
+            <div className="reviews-empty text-center"><p role="alert">{reviewLoadError}</p></div>
+          ) : reviews.length ? (
+            <>
+              <article className="review-card">
+                <p className="review-stars" aria-label={`${reviews[activeReview].rating} out of 5 stars`}>
+                  {'★'.repeat(reviews[activeReview].rating)}{'☆'.repeat(5 - reviews[activeReview].rating)}
+                </p>
+                <blockquote>“{reviews[activeReview].review}”</blockquote>
+                <p className="review-author">
+                  {reviews[activeReview].name}
+                  {reviews[activeReview].business && ` · ${reviews[activeReview].business}`}
+                </p>
+              </article>
+              {reviews.length > 1 && (
+                <div className="review-carousel-controls">
+                  <button type="button" onClick={() => showReview(activeReview - 1)} aria-label="Previous review">
+                    Previous
+                  </button>
+                  <span>{activeReview + 1} / {reviews.length}</span>
+                  <button type="button" onClick={() => showReview(activeReview + 1)} aria-label="Next review">
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="reviews-empty text-center">
+              <p>Be the first to share your experience.</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

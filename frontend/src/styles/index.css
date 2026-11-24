@@ -640,7 +640,9 @@ section.hero {
 }
 
 .reviews-carousel {
-	margin-top: 2.5rem;
+	width: 100%;
+	max-width: 32rem;
+	margin: 2.5rem auto 0;
 }
 
 .review-card,
@@ -653,6 +655,11 @@ section.hero {
 }
 
 .review-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1;
 	text-align: center;
 }
 
