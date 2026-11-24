@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabase'
 
-const initialForm = { fullName: '', email: '', password: '', confirmPassword: '' }
+const initialForm = { email: '', password: '' }
 
 export default function AdminAccount() {
-  const [mode, setMode] = useState('signin')
   const [form, setForm] = useState(initialForm)
   const [feedback, setFeedback] = useState({ message: '', error: '' })
   const [user, setUser] = useState(null)
@@ -85,17 +84,8 @@ export default function AdminAccount() {
     setForm(current => ({ ...current, [field]: value }))
   }
 
-  function changeMode(nextMode) {
-    setMode(nextMode)
-    setFeedback({ message: '', error: '' })
-  }
-
   async function onSubmit(event) {
     event.preventDefault()
-    if (mode === 'signup' && form.password !== form.confirmPassword) {
-      setFeedback({ message: '', error: 'Passwords do not match.' })
-      return
-    }
 
     setSubmitting(true)
     setSessionMessage('')
@@ -103,45 +93,19 @@ export default function AdminAccount() {
     setFeedback({ message: '', error: '' })
 
     try {
-      if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({
-          email: form.email.trim(),
-          password: form.password,
-          options: {
-            data: {
-              full_name: form.fullName.trim(),
-              requested_role: 'admin',
-            },
-          },
-        })
-        if (error) throw error
-        if (!data.user) throw new Error('Sign-up did not return an account. Please try again.')
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form.email.trim(),
+        password: form.password,
+      })
+      if (error) throw error
+      if (!data.user) throw new Error('Sign-in did not return an account. Please try again.')
 
-        if (data.session) {
-          setUser(data.user)
-          setSessionMessage('Your account was created. Admin access remains pending until the site owner reviews your request.')
-        } else {
-          setFeedback({
-            message: 'If this email can be registered, a confirmation link will be sent. Admin access remains pending until the site owner reviews your request.',
-            error: '',
-          })
-        }
-        setForm(current => ({ ...current, password: '', confirmPassword: '' }))
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: form.email.trim(),
-          password: form.password,
-        })
-        if (error) throw error
-        if (!data.user) throw new Error('Sign-in did not return an account. Please try again.')
-
-        setUser(data.user)
-        setSessionMessage('You are signed in.')
-        setForm(current => ({ ...current, password: '' }))
-      }
+      setUser(data.user)
+      setSessionMessage('You are signed in.')
+      setForm(current => ({ ...current, password: '' }))
     } catch (error) {
-      console.error('Admin account request failed:', error)
-      setFeedback({ message: '', error: error.message || 'The account request failed. Please try again.' })
+      console.error('Admin sign-in failed:', error)
+      setFeedback({ message: '', error: error.message || 'Sign-in failed. Please try again.' })
     } finally {
       setSubmitting(false)
     }
@@ -166,13 +130,12 @@ export default function AdminAccount() {
   }
 
   const isAdmin = profile?.role === 'admin'
-  const hasAdminRequest = user?.user_metadata?.requested_role === 'admin'
 
   return (
     <section className="account-section">
       <header className="account-page-header">
         <p className="page-eyebrow">Admin access</p>
-        <h1>{user ? 'Admin account' : 'Admin sign in or request access'}</h1>
+        <h1>{user ? 'Admin account' : 'Admin sign in'}</h1>
       </header>
 
       {loadingSession ? (
@@ -184,7 +147,7 @@ export default function AdminAccount() {
             <>
               <p className="account-role">
                 {profile.full_name ? `${profile.full_name} · ` : ''}
-                {isAdmin ? 'Administrator' : hasAdminRequest ? 'Admin access pending' : 'No admin access'}
+                {isAdmin ? 'Administrator' : 'No admin access'}
               </p>
               {!isAdmin && (
                 <p className="account-admin-note">
@@ -207,39 +170,7 @@ export default function AdminAccount() {
         <article className="account-card account-card--admin">
           {sessionError && <p className="account-message account-message--error" role="alert">{sessionError}</p>}
           {sessionMessage && <p className="account-message" role="status">{sessionMessage}</p>}
-          <div className="account-mode-toggle" role="group" aria-label="Admin account action">
-            <button
-              type="button"
-              aria-pressed={mode === 'signin'}
-              className={mode === 'signin' ? 'is-active' : ''}
-              onClick={() => changeMode('signin')}
-            >
-              Admin sign in
-            </button>
-            <button
-              type="button"
-              aria-pressed={mode === 'signup'}
-              className={mode === 'signup' ? 'is-active' : ''}
-              onClick={() => changeMode('signup')}
-            >
-              Admin sign up
-            </button>
-          </div>
           <form className="account-form" onSubmit={onSubmit}>
-            {mode === 'signup' && (
-              <label className="account-field">
-                <span>Full name</span>
-                <input
-                  type="text"
-                  name="admin-name"
-                  autoComplete="name"
-                  value={form.fullName}
-                  onChange={event => updateForm('fullName', event.target.value)}
-                  maxLength={120}
-                  required
-                />
-              </label>
-            )}
             <label className="account-field">
               <span>Email</span>
               <input
@@ -256,36 +187,20 @@ export default function AdminAccount() {
               <input
                 type="password"
                 name="admin-password"
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                autoComplete="current-password"
                 value={form.password}
                 onChange={event => updateForm('password', event.target.value)}
-                minLength={mode === 'signup' ? 8 : undefined}
                 required
               />
-              {mode === 'signup' && <span className="account-hint">Use at least 8 characters.</span>}
             </label>
-            {mode === 'signup' && (
-              <label className="account-field">
-                <span>Confirm password</span>
-                <input
-                  type="password"
-                  name="admin-confirm-password"
-                  autoComplete="new-password"
-                  value={form.confirmPassword}
-                  onChange={event => updateForm('confirmPassword', event.target.value)}
-                  minLength={8}
-                  required
-                />
-              </label>
-            )}
             {feedback.message && <p className="account-message" role="status">{feedback.message}</p>}
             {feedback.error && <p className="account-message account-message--error" role="alert">{feedback.error}</p>}
             <button type="submit" className="btn-primary account-submit" disabled={submitting}>
-              {submitting ? 'Please wait...' : mode === 'signup' ? 'Request admin account' : 'Sign in as admin'}
+              {submitting ? 'Please wait...' : 'Sign in as admin'}
             </button>
           </form>
           <p className="account-admin-note">
-            Admin sign-up creates an account request; it does not grant admin privileges. The site owner must review and approve access.
+            Create an account on the regular Account page first. The site owner must verify and promote it before it can access admin tools.
           </p>
         </article>
       )}

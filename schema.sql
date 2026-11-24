@@ -8,6 +8,9 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+comment on column public.profiles.role is
+  'New profiles are always customer. Only a trusted project owner may promote a verified account to admin; users cannot change their own role.';
+
 alter table public.profiles enable row level security;
 
 revoke all on table public.profiles from public, anon, authenticated;
@@ -56,6 +59,16 @@ select
   'customer'
 from auth.users
 on conflict (id) do nothing;
+
+-- After verifying an account created through /account, promote it manually as
+-- the project owner. Do not expose this update through the frontend.
+-- update public.profiles
+-- set role = 'admin'
+-- where id = (
+--   select id
+--   from auth.users
+--   where email = lower('admin@example.com')
+-- );
 
 create table if not exists public.reservations (
   id uuid primary key default gen_random_uuid(),
