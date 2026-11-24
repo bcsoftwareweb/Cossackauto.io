@@ -1,5 +1,5 @@
-import React from 'react'
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
@@ -11,9 +11,21 @@ import Services from './pages/Services'
 import Reviews from './pages/Reviews'
 import Account from './pages/Account'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    document.body.scrollTop = 0
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
+
 export default function App() {
   return (
     <HashRouter>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1">
