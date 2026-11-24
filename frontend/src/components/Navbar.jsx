@@ -2,6 +2,16 @@ import React, { useState, useRef, useEffect } from 'react'
 import { logo, logoFallback } from '../config/brand'
 import { Link } from 'react-router-dom'
 
+function SignInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="8" cy="7" r="3" />
+      <path d="M2.5 20c.4-3.1 2.2-5 5.5-5 2.5 0 4.1 1.2 4.9 3.5" />
+      <path d="M14 8h8m-3-3 3 3-3 3" />
+    </svg>
+  )
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -51,7 +61,6 @@ export default function Navbar() {
             <li><Link to="/services">Services</Link></li>
             <li><Link to="/reviews">Reviews</Link></li>
             <li><Link to="/reservation">Reservation</Link></li>
-            <li><Link to="/account">Account</Link></li>
           </ul>
         </nav>
 
@@ -64,16 +73,23 @@ export default function Navbar() {
               <li className="py-2"><Link to="/services" onClick={handleNavLinkClick}>Services</Link></li>
               <li className="py-2"><Link to="/reviews" onClick={handleNavLinkClick}>Reviews</Link></li>
               <li className="py-2"><Link to="/reservation" onClick={handleNavLinkClick}>Reservation</Link></li>
-              <li className="py-2"><Link to="/account" onClick={handleNavLinkClick}>Account</Link></li>
             </ul>
-              <div className="p-4 border-t border-white/5">
-              <Link to="/reservation" onClick={handleNavLinkClick} className="btn-primary w-full block text-center py-3">Book now</Link>
-              </div>
+            <div className="mobile-nav-actions p-4 border-t border-white/5">
+              <Link to="/reservation" onClick={handleNavLinkClick} className="btn-primary flex-1 text-center py-3">Book now</Link>
+              <Link to="/account" onClick={handleNavLinkClick} className="account-cta" aria-label="Account">
+                <SignInIcon />
+                <span>Account</span>
+              </Link>
+            </div>
           </nav>
         )}
 
         <div className="hidden lg:flex items-center ml-4 header-cta">
           <Link to="/reservation" className="btn-primary">Book now</Link>
+          <Link to="/account" className="account-cta" aria-label="Account">
+            <SignInIcon />
+            <span>Account</span>
+          </Link>
         </div>
       </div>
     </header>
