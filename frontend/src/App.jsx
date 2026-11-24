@@ -10,6 +10,7 @@ import Home from './pages/Home'
 import Services from './pages/Services'
 import Reviews from './pages/Reviews'
 import Account from './pages/Account'
+import AdminAccount from './pages/AdminAccount'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/reservation" element={<Reservation />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/admin" element={<AdminAccount />} />
           </Routes>
         </main>
         <Footer />
