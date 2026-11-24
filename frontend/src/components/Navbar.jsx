@@ -74,7 +74,6 @@ export default function Navbar() {
     { to: '/services', label: 'Services' },
     { to: '/reviews', label: 'Reviews' },
     { to: '/reservation', label: 'Reservation' },
-    ...(userId ? [{ to: '/updates', label: 'Updates' }] : []),
   ]
 
   return (
