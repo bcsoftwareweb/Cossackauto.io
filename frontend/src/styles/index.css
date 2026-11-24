@@ -625,6 +625,16 @@ section.hero {
 .about-body p { margin-bottom: 1rem; }
 
 /* Reviews */
+#reviews {
+	padding-bottom: 3rem;
+}
+
+@media (min-width: 1025px) {
+	main:has(#reviews) {
+		padding-bottom: 1.5rem;
+	}
+}
+
 .reviews-empty {
 	margin-top: 2.5rem;
 	padding: 2rem 1.5rem;
