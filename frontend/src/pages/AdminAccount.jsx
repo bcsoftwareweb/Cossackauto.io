@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import AdminDashboard from './AdminDashboard'
 import { supabase } from '../utils/supabase'
 
 const initialForm = { email: '', password: '' }
@@ -130,6 +131,10 @@ export default function AdminAccount() {
   }
 
   const isAdmin = profile?.role === 'admin'
+
+  if (!loadingSession && user && isAdmin) {
+    return <AdminDashboard user={user} onSignOut={onSignOut} />
+  }
 
   return (
     <section className="account-section">

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabase'
+import { PageIntro, SiteContentSections, useSiteSections } from '../components/SiteContent'
+
+const DEFAULT_INTRO = {
+  eyebrow: 'Testimonials',
+  title: 'Customer reviews',
+  body: "We'd love to hear about your experience with Cossack Auto Solutions.",
+}
 
 function getReviewsPerPage() {
   if (typeof window === 'undefined') return 3
@@ -9,6 +16,7 @@ function getReviewsPerPage() {
 }
 
 export default function Reviews() {
+  const { sections, error: contentError } = useSiteSections('reviews')
   const [reviews, setReviews] = useState([])
   const [reviewsPerPage, setReviewsPerPage] = useState(getReviewsPerPage)
   const [activePage, setActivePage] = useState(0)
@@ -100,11 +108,10 @@ export default function Reviews() {
   return (
     <section id="reviews">
       <div className="max-w-5xl mx-auto px-4">
-        <div className="page-header">
-          <p className="page-eyebrow">Testimonials</p>
-          <h2>Customer reviews</h2>
-          <p className="page-header-lead">We'd love to hear about your experience with Cossack Auto Solutions.</p>
-        </div>
+        <PageIntro
+          section={sections.find(section => section.section_type === 'intro')}
+          fallback={DEFAULT_INTRO}
+        />
 
         <div className="review-form-card">
           <h3>Share your experience with us</h3>
@@ -222,6 +229,7 @@ export default function Reviews() {
             </div>
           )}
         </div>
+        <SiteContentSections sections={sections} error={contentError} />
       </div>
     </section>
   )

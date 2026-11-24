@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { logo, logoFallback } from '../config/brand'
 import { Link } from 'react-router-dom'
+import { supabase } from '../utils/supabase'
 
 function SignInIcon() {
   return (
@@ -15,6 +16,8 @@ function SignInIcon() {
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
+  const [userId, setUserId] = useState(null)
+  const [profileRole, setProfileRole] = useState('')
   const timeoutRef = useRef(null)
 
   const openMenu = () => {
@@ -38,9 +41,69 @@ export default function Navbar() {
     return () => clearTimeout(timeoutRef.current)
   }, [])
 
+  useEffect(() => {
+    let active = true
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return
+      if (error) {
+        console.error('Loading navbar session failed:', error)
+        return
+      }
+      setUserId(data.session?.user?.id ?? null)
+    }).catch(error => {
+      if (active) console.error('Loading navbar session failed:', error)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setUserId(session?.user?.id ?? null)
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!userId) {
+      setProfileRole('')
+      return
+    }
+
+    let active = true
+
+    async function loadProfileRole() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .maybeSingle()
+        if (error) throw error
+        if (active) setProfileRole(data?.role ?? '')
+      } catch (error) {
+        if (active) console.error('Loading navbar profile role failed:', error)
+      }
+    }
+
+    loadProfileRole()
+    return () => { active = false }
+  }, [userId])
+
   const handleNavLinkClick = () => {
     closeMenu()
   }
+
+  const navItems = [
+    { to: '/', label: 'Home' },
+    { to: '/about', label: 'About' },
+    { to: '/services', label: 'Services' },
+    { to: '/reviews', label: 'Reviews' },
+    { to: '/reservation', label: 'Reservation' },
+    ...(userId ? [{ to: '/updates', label: 'Updates' }] : []),
+    ...(profileRole === 'admin' ? [{ to: '/admin', label: 'Manage site' }] : []),
+  ]
 
   return (
     <header className="site-header">
@@ -56,11 +119,9 @@ export default function Navbar() {
         {/* Desktop nav - always visible on md+ */}
         <nav className="desktop-nav hidden lg:flex lg:items-center lg:justify-center lg:static lg:bg-transparent lg:text-inherit">
           <ul className="flex flex-row space-x-6 text-sm">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/services">Services</Link></li>
-            <li><Link to="/reviews">Reviews</Link></li>
-            <li><Link to="/reservation">Reservation</Link></li>
+            {navItems.map(item => (
+              <li key={item.to}><Link to={item.to}>{item.label}</Link></li>
+            ))}
           </ul>
         </nav>
 
@@ -68,11 +129,11 @@ export default function Navbar() {
         {visible && (
           <nav className={`mobile-nav lg:hidden absolute left-0 right-0 top-full bg-[var(--color-charcoal)] text-[var(--color-offwhite)] transform transition-all duration-200 ${open ? 'translate-y-0 opacity-100 pointer-events-auto z-50' : '-translate-y-2 opacity-0 pointer-events-none'}`}>
             <ul className="flex flex-col space-y-2 text-sm p-4">
-              <li className="py-2"><Link to="/" onClick={handleNavLinkClick}>Home</Link></li>
-              <li className="py-2"><Link to="/about" onClick={handleNavLinkClick}>About</Link></li>
-              <li className="py-2"><Link to="/services" onClick={handleNavLinkClick}>Services</Link></li>
-              <li className="py-2"><Link to="/reviews" onClick={handleNavLinkClick}>Reviews</Link></li>
-              <li className="py-2"><Link to="/reservation" onClick={handleNavLinkClick}>Reservation</Link></li>
+              {navItems.map(item => (
+                <li className="py-2" key={item.to}>
+                  <Link to={item.to} onClick={handleNavLinkClick}>{item.label}</Link>
+                </li>
+              ))}
             </ul>
             <div className="mobile-nav-actions p-4 border-t border-white/5">
               <Link to="/reservation" onClick={handleNavLinkClick} className="btn-primary flex-1 text-center py-3">Book now</Link>

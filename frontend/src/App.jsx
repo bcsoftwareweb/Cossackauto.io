@@ -11,6 +11,7 @@ import Services from './pages/Services'
 import Reviews from './pages/Reviews'
 import Account from './pages/Account'
 import AdminAccount from './pages/AdminAccount'
+import CustomerUpdates from './pages/CustomerUpdates'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/reservation" element={<Reservation />} />
             <Route path="/account" element={<Account />} />
             <Route path="/admin" element={<AdminAccount />} />
+            <Route path="/updates" element={<CustomerUpdates />} />
           </Routes>
         </main>
         <Footer />

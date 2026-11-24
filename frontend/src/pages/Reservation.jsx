@@ -2,11 +2,18 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 import { supabase } from '../utils/supabase'
+import { PageIntro, SiteContentSections, useSiteSections } from '../components/SiteContent'
 
 const MAX_PHOTO_SIZE = 10 * 1024 * 1024
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+const DEFAULT_INTRO = {
+  eyebrow: 'Schedule service',
+  title: 'Book an appointment',
+  body: "Fill out the form below and we'll get back to you to confirm your appointment.",
+}
 
 export default function Reservation() {
+  const { sections, error: contentError } = useSiteSections('reservation')
   const [form, setForm] = useState({ year: '', make: '', model: '', name: '', email: '', contact: '', servicesNeeded: '', description: '' })
   const [fileName, setFileName] = useState('No file chosen')
   const [file, setFile] = useState(null)
@@ -274,11 +281,10 @@ export default function Reservation() {
   return (
     <section className="reservation-section">
       <div className="max-w-3xl mx-auto px-4">
-        <div className="page-header">
-          <p className="page-eyebrow">Schedule service</p>
-          <h2>Book an appointment</h2>
-          <p className="page-header-lead">Fill out the form below and we'll get back to you to confirm your appointment.</p>
-        </div>
+        <PageIntro
+          section={sections.find(section => section.section_type === 'intro')}
+          fallback={DEFAULT_INTRO}
+        />
       </div>
 
       <div className="mx-auto max-w-3xl px-4">
@@ -360,6 +366,9 @@ export default function Reservation() {
         {status === 'error' && <p role="alert" className="text-red-700">{submissionError}</p>}
       </div>
       </form>
+    </div>
+    <div className="max-w-5xl mx-auto px-4">
+      <SiteContentSections sections={sections} error={contentError} />
     </div>
     </section>
   )

@@ -4,7 +4,7 @@ React + Vite frontend for the Cossack Auto Solutions website. Reservation reques
 
 ## Supabase setup
 
-1. In the Supabase Dashboard, open **SQL Editor**, paste the contents of `schema.sql`, and run it. This creates the tables, row-level security policies, and private photo storage bucket.
+1. In the Supabase Dashboard, open **SQL Editor**, paste the contents of `schema.sql`, and run it. This creates the tables, row-level security policies, private reservation-photo bucket, public site-media bucket, CMS content sections, and customer updates.
 2. Copy `frontend/.env.example` to `frontend/.env.local` and set the project URL and publishable key:
 
    ```env
@@ -20,9 +20,9 @@ React + Vite frontend for the Cossack Auto Solutions website. Reservation reques
    npm run dev
    ```
 
-The Supabase anon key is intended for browser use only when row-level security is enabled and policies are configured. Never put a Supabase `service_role` or secret key in frontend code or environment variables prefixed with `VITE_`. The schema uses row-level security: visitors can submit reservations and reviews, read only approved reviews, and upload photos to private storage. Reservation records and photos are not publicly readable.
+The Supabase anon key is intended for browser use only when row-level security is enabled and policies are configured. Never put a Supabase `service_role` or secret key in frontend code or environment variables prefixed with `VITE_`. The schema uses row-level security: visitors can submit reservations and reviews, read only approved reviews, and read published site sections. Reservation records and photos are not publicly readable. Site-media files are public to display on the website, but only admins can upload, update, or delete them.
 
-The **Account** page linked from the navbar is the only sign-up form. An admin creates an account there like any other user, then the site owner verifies the person and manually promotes that profile in the Supabase SQL Editor. New profiles always receive the `customer` role, regardless of browser metadata, and signed-in users cannot change their own role. Admins use the separate, unlinked sign-in page at `/#/admin`; there is no public admin sign-up.
+The **Account** page linked from the navbar is the only sign-up form. An admin creates an account there like any other user, then the site owner verifies the person and manually promotes that profile in the Supabase SQL Editor. New profiles always receive the `customer` role, regardless of browser metadata, and signed-in users cannot change their own role. Admins use the separate, unlinked sign-in page at `/#/admin`; it opens the CMS only for profiles with the `admin` role.
 
 After verifying the account, grant admin access by running this query with its email:
 
@@ -36,7 +36,9 @@ where id = (
 );
 ```
 
-The profile table only lets a signed-in user read their own profile and update their name. It does not allow users to change their role. Admin access changes must be made by a trusted project owner. There is no admin dashboard yet.
+The profile table only lets a signed-in user read their own profile and update their name. It does not allow users to change their role. Admin access changes must be made by a trusted project owner.
+
+The admin dashboard edits page headings, the home hero, the About profile, service cards, and custom text/image sections. It can also publish customer updates. Published site sections are public; published customer updates are visible only to signed-in users at `/#/updates`. The database policies—not hidden routes or UI controls—enforce these access rules.
 
 New reviews have `is_published = false`. To approve a review, use the Supabase Dashboard or SQL Editor to set that row's `is_published` value to `true`. For example:
 

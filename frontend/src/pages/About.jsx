@@ -1,40 +1,56 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import aboutPhoto from '../assets/about-photo.png'
+import { ContentAction, getSiteImageUrl, PageIntro, SiteContentSections, useSiteSections } from '../components/SiteContent'
 
-export default function About(){
+const DEFAULT_INTRO = {
+  eyebrow: 'About us',
+  title: 'Meet the shop',
+  body: 'Your trusted neighborhood auto repair shop. Honest work, fair prices, quality service.',
+}
+
+const DEFAULT_PROFILE = {
+  title: 'Your Name',
+  body: "Hi, I'm Your Name — owner of Cossack Auto Solutions. I started this shop because I believe in honest, high-quality auto repair.\n\nI treat every vehicle like my own and stand behind my work. If you'd like to schedule service, please use the button below to book an appointment.",
+  button_label: 'Book an appointment',
+  button_url: '/reservation',
+}
+
+export default function About() {
+  const { sections, error } = useSiteSections('about')
+  const intro = sections.find(section => section.section_type === 'intro')
+  const profile = sections.find(section => section.section_type === 'profile') ?? DEFAULT_PROFILE
+  const profileImage = getSiteImageUrl(profile.image_path) || aboutPhoto
+
   return (
     <section id="about">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="page-header">
-          <p className="page-eyebrow">About us</p>
-          <h2>Meet the shop</h2>
-          <p className="page-header-lead">Your trusted neighborhood auto repair shop. Honest work, fair prices, quality service.</p>
-        </div>
+        <PageIntro section={intro} fallback={DEFAULT_INTRO} />
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 items-start">
           <div className="md:col-span-1 flex justify-center md:justify-start">
             <img
-              src={aboutPhoto}
-              alt="Owner of Cossack Auto Solutions"
+              src={profileImage}
+              alt={profile.title || 'Owner of Cossack Auto Solutions'}
               className="about-photo"
             />
           </div>
 
           <div className="md:col-span-2">
-            <h3 className="text-charcoal">Your Name</h3>
-            <div className="about-role">Owner / Founder</div>
+            <h3 className="text-charcoal">{profile.title}</h3>
+            <div className="about-role">{profile.eyebrow || 'Owner / Founder'}</div>
 
             <div className="mt-6 about-body">
-              <p>Hi, I'm Your Name — owner of Cossack Auto Solutions. I started this shop because I believe in honest, high-quality auto repair.</p>
-              <p>I treat every vehicle like my own and stand behind my work. If you'd like to schedule service, please use the button below to book an appointment.</p>
+              {profile.body.split(/\n\n+/).map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
             </div>
 
             <div className="mt-8">
-              <Link to="/reservation" className="btn-primary">Book an appointment</Link>
+              <ContentAction label={profile.button_label} url={profile.button_url} />
             </div>
           </div>
         </div>
+        <SiteContentSections sections={sections} error={error} />
       </div>
     </section>
   )

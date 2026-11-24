@@ -554,6 +554,78 @@ section.hero {
 	line-height: 1.65;
 }
 
+.page-header-image {
+	max-width: min(100%, 34rem);
+	max-height: 22rem;
+	margin: 1.5rem auto 0;
+	border-radius: var(--radius);
+	object-fit: cover;
+}
+
+.cms-page-action {
+	margin-top: 1.25rem;
+}
+
+.cms-section-body {
+	white-space: pre-line;
+}
+
+.cms-load-error {
+	margin: 1.5rem auto;
+	padding: 0.875rem 1rem;
+	border-radius: var(--radius);
+	background: #fff1f1;
+	color: #7a0d15;
+	text-align: center;
+}
+
+.cms-content-section {
+	margin-top: 2rem;
+	padding: clamp(1.5rem, 4vw, 3rem);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: var(--color-surface);
+	box-shadow: var(--shadow-sm);
+}
+
+.cms-content-inner {
+	display: grid;
+	align-items: center;
+	gap: 1.5rem;
+	max-width: 72rem;
+	margin-inline: auto;
+}
+
+.cms-content-copy h2 {
+	margin: 0;
+	font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.cms-content-copy > p:not(.page-eyebrow) {
+	margin: 0.75rem 0 1.25rem;
+}
+
+.cms-content-inner > img,
+.cms-service-image {
+	width: 100%;
+	max-height: 22rem;
+	border-radius: calc(var(--radius) - 2px);
+	object-fit: cover;
+}
+
+.hero-content-image {
+	max-height: 18rem;
+	margin: 1.5rem auto 0;
+	border-radius: var(--radius);
+	object-fit: cover;
+}
+
+@media (min-width: 768px) {
+	.cms-content-inner {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
 /* Service cards */
 .service-card {
 	background: var(--color-surface);
@@ -904,6 +976,282 @@ section.hero {
 
 .account-role {
 	font-size: 0.875rem;
+}
+
+.cms-admin-section {
+	width: min(calc(100% - 2rem), 80rem);
+	margin-inline: auto;
+	padding: var(--section-py-mobile) 0;
+}
+
+.cms-admin-header,
+.cms-manager-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.cms-admin-header h1 {
+	margin: 0;
+	font-size: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.cms-admin-header p:not(.page-eyebrow),
+.cms-manager-heading p {
+	margin: 0.5rem 0 0;
+}
+
+.cms-admin-header .page-eyebrow {
+	margin: 0 0 0.35rem;
+	color: var(--color-red);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.cms-admin-tabs {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 2rem;
+	padding: 0.35rem;
+	border-radius: var(--radius);
+	background: var(--color-surface);
+}
+
+.cms-admin-tabs button {
+	padding: 0.7rem 1rem;
+	border: 1px solid transparent;
+	border-radius: calc(var(--radius) - 3px);
+	background: transparent;
+	color: var(--color-charcoal);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.cms-admin-tabs button.is-active {
+	border-color: var(--color-border);
+	background: #fff;
+	box-shadow: var(--shadow-sm);
+}
+
+.cms-manager-heading h2 {
+	margin: 0;
+	font-size: 1.5rem;
+}
+
+.cms-manager-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+	align-items: start;
+	gap: 1.5rem;
+}
+
+.cms-item-list {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.cms-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.875rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+}
+
+.cms-item.is-selected {
+	border-color: var(--color-red);
+	box-shadow: 0 0 0 1px var(--color-red);
+}
+
+.cms-item-select {
+	display: grid;
+	gap: 0.25rem;
+	min-width: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+}
+
+.cms-item-title {
+	color: var(--color-charcoal);
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.cms-item-meta,
+.cms-field-hint {
+	color: var(--color-muted);
+	font-size: 0.75rem;
+	font-weight: 400;
+}
+
+.cms-item-delete {
+	flex: none;
+	padding: 0.35rem 0.55rem;
+	border: 1px solid var(--color-border);
+	border-radius: calc(var(--radius) - 3px);
+	background: #fff;
+	color: #7a0d15;
+	font: inherit;
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+
+.cms-editor-card {
+	display: grid;
+	gap: 1rem;
+	padding: clamp(1.25rem, 3vw, 2rem);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+	box-shadow: var(--shadow-sm);
+}
+
+.cms-editor-card h3 {
+	margin: 0;
+	font-size: 1.25rem;
+}
+
+.cms-field {
+	display: grid;
+	gap: 0.4rem;
+	color: var(--color-charcoal);
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.cms-field input,
+.cms-field select,
+.cms-field textarea {
+	width: 100%;
+	min-height: 2.75rem;
+	padding: 0.65rem 0.8rem;
+	border: 1px solid var(--color-border-hover);
+	border-radius: calc(var(--radius) - 3px);
+	background: #fff;
+	color: var(--color-charcoal);
+	font: inherit;
+	font-weight: 400;
+}
+
+.cms-field textarea {
+	min-height: 8rem;
+	resize: vertical;
+}
+
+.cms-field input:focus,
+.cms-field select:focus,
+.cms-field textarea:focus {
+	border-color: var(--color-red);
+	outline: 2px solid rgba(142, 15, 24, 0.15);
+	outline-offset: 1px;
+}
+
+.cms-checkbox-field {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.cms-checkbox-field input {
+	width: 1rem;
+	height: 1rem;
+	accent-color: var(--color-red);
+}
+
+.cms-image-preview {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.cms-image-preview img {
+	width: min(100%, 14rem);
+	max-height: 10rem;
+	border-radius: calc(var(--radius) - 3px);
+	object-fit: cover;
+}
+
+.cms-form-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.cms-status,
+.cms-empty-state {
+	margin-top: 1.5rem;
+	padding: 1.5rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+	text-align: center;
+}
+
+.cms-empty-state p {
+	margin-top: 0;
+}
+
+.customer-updates-list {
+	display: grid;
+	gap: 1.25rem;
+	margin-top: 2.5rem;
+}
+
+.customer-update-card {
+	overflow: hidden;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	background: #fff;
+	box-shadow: var(--shadow-sm);
+}
+
+.customer-update-card > img {
+	width: 100%;
+	max-height: 24rem;
+	object-fit: cover;
+}
+
+.customer-update-content {
+	padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.customer-update-content h2 {
+	margin: 0;
+	font-size: clamp(1.4rem, 3vw, 1.85rem);
+}
+
+.customer-update-content > p:last-child {
+	margin-bottom: 0;
+}
+
+.customer-update-date {
+	margin: 0 0 0.5rem;
+	font-size: 0.8125rem;
+}
+
+@media (max-width: 760px) {
+	.cms-admin-header,
+	.cms-manager-heading {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.cms-manager-layout {
+		grid-template-columns: 1fr;
+	}
 }
 
 .review-form-card h3 {
