@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabase'
 
+const initialForm = { fullName: '', email: '', password: '', confirmPassword: '' }
+const initialFeedback = {
+  customer: { message: '', error: '' },
+  admin: { message: '', error: '' },
+}
+
 export default function Account() {
-  const [mode, setMode] = useState('signin')
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [customerMode, setCustomerMode] = useState('signin')
+  const [adminMode, setAdminMode] = useState('signin')
+  const [customerForm, setCustomerForm] = useState(initialForm)
+  const [adminForm, setAdminForm] = useState(initialForm)
+  const [feedback, setFeedback] = useState(initialFeedback)
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loadingSession, setLoadingSession] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
+  const [submitting, setSubmitting] = useState('')
+  const [sessionMessage, setSessionMessage] = useState('')
+  const [sessionError, setSessionError] = useState('')
   const [profileError, setProfileError] = useState('')
 
   useEffect(() => {
@@ -22,7 +28,7 @@ export default function Account() {
       if (!active) return
       if (error) {
         console.error('Loading the authentication session failed:', error)
-        setErrorMessage(error.message)
+        setSessionError(error.message)
       } else {
         setUser(data.session?.user ?? null)
       }
@@ -30,7 +36,7 @@ export default function Account() {
     }).catch(error => {
       if (!active) return
       console.error('Loading the authentication session failed:', error)
-      setErrorMessage(error.message || 'Your account session could not be loaded.')
+      setSessionError(error.message || 'Your account session could not be loaded.')
       setLoadingSession(false)
     })
 
@@ -81,196 +87,326 @@ export default function Account() {
     return () => { active = false }
   }, [user])
 
-  async function onSubmit(event) {
+  function updateForm(type, field, value) {
+    const setForm = type === 'admin' ? setAdminForm : setCustomerForm
+    setForm(current => ({ ...current, [field]: value }))
+  }
+
+  function updateFeedback(type, field, value) {
+    setFeedback(current => ({
+      ...current,
+      [type]: { ...current[type], [field]: value },
+    }))
+  }
+
+  function changeMode(type, mode) {
+    const setMode = type === 'admin' ? setAdminMode : setCustomerMode
+    setMode(mode)
+    setFeedback(current => ({ ...current, [type]: { message: '', error: '' } }))
+  }
+
+  async function onSubmit(event, type) {
     event.preventDefault()
-    if (mode === 'signup' && password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.')
+    const mode = type === 'admin' ? adminMode : customerMode
+    const form = type === 'admin' ? adminForm : customerForm
+
+    if (mode === 'signup' && form.password !== form.confirmPassword) {
+      updateFeedback(type, 'error', 'Passwords do not match.')
       return
     }
 
-    setSubmitting(true)
-    setMessage('')
-    setErrorMessage('')
+    setSubmitting(type)
+    setSessionMessage('')
+    setSessionError('')
+    updateFeedback(type, 'message', '')
+    updateFeedback(type, 'error', '')
 
     try {
       if (mode === 'signup') {
         const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { data: { full_name: fullName.trim() } },
+          email: form.email.trim(),
+          password: form.password,
+          options: {
+            data: {
+              full_name: form.fullName.trim(),
+              ...(type === 'admin' ? { requested_role: 'admin' } : {}),
+            },
+          },
         })
         if (error) throw error
         if (!data.user) throw new Error('Sign-up did not return an account. Please try again.')
 
         if (data.session) {
           setUser(data.user)
-          setMessage('Your customer account has been created.')
+          setSessionMessage(type === 'admin'
+            ? 'Your account was created. Admin access remains pending until the site owner reviews your request.'
+            : 'Your customer account has been created.')
         } else {
-          setMessage('If this email can be registered, a confirmation link will be sent. Check your inbox to finish creating your account.')
+          updateFeedback(
+            type,
+            'message',
+            type === 'admin'
+              ? 'If this email can be registered, a confirmation link will be sent. Admin access remains pending until the site owner reviews your request.'
+              : 'If this email can be registered, a confirmation link will be sent. Check your inbox to finish creating your account.'
+          )
         }
-        setPassword('')
-        setConfirmPassword('')
+
+        const setForm = type === 'admin' ? setAdminForm : setCustomerForm
+        setForm(current => ({ ...current, password: '', confirmPassword: '' }))
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
+          email: form.email.trim(),
+          password: form.password,
         })
         if (error) throw error
         if (!data.user) throw new Error('Sign-in did not return an account. Please try again.')
 
         setUser(data.user)
-        setMessage('You are signed in.')
-        setPassword('')
+        setSessionMessage('You are signed in.')
+        const setForm = type === 'admin' ? setAdminForm : setCustomerForm
+        setForm(current => ({ ...current, password: '' }))
       }
     } catch (error) {
-      console.error(mode === 'signup' ? 'Account sign-up failed:' : 'Account sign-in failed:', error)
-      setErrorMessage(error.message || 'The account request failed. Please try again.')
+      console.error(`${type === 'admin' ? 'Admin' : 'Customer'} account request failed:`, error)
+      updateFeedback(type, 'error', error.message || 'The account request failed. Please try again.')
     } finally {
-      setSubmitting(false)
+      setSubmitting('')
     }
   }
 
   async function onSignOut() {
-    setSubmitting(true)
-    setMessage('')
-    setErrorMessage('')
+    setSubmitting('signout')
+    setSessionMessage('')
+    setSessionError('')
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       setUser(null)
       setProfile(null)
-      setMessage('You are signed out.')
+      setSessionMessage('You are signed out.')
     } catch (error) {
       console.error('Signing out failed:', error)
-      setErrorMessage(error.message || 'Sign-out failed. Please try again.')
+      setSessionError(error.message || 'Sign-out failed. Please try again.')
     } finally {
-      setSubmitting(false)
+      setSubmitting('')
     }
   }
 
   return (
     <section className="account-section">
-      <div className="account-card">
-        <p className="page-eyebrow">Your account</p>
-        <h1>{user ? 'Account details' : 'Sign in or create an account'}</h1>
+      <header className="account-page-header">
+        <p className="page-eyebrow">Account access</p>
+        <h1>{user ? 'Account details' : 'Choose your account type'}</h1>
+      </header>
 
-        {loadingSession ? (
-          <p role="status">Checking your account...</p>
-        ) : user ? (
-          <div className="account-signed-in">
-            <p className="account-email">{user.email}</p>
-            {profile ? (
+      {loadingSession ? (
+        <p role="status">Checking your account...</p>
+      ) : user ? (
+        <div className="account-card account-signed-in">
+          <p className="account-email">{user.email}</p>
+          {profile ? (
+            <>
               <p className="account-role">
                 {profile.full_name ? `${profile.full_name} · ` : ''}
-                {profile.role === 'admin' ? 'Administrator' : 'Customer'}
+                {profile.role === 'admin'
+                  ? 'Administrator'
+                  : user.user_metadata?.requested_role === 'admin'
+                    ? 'Admin access pending'
+                    : 'Customer'}
               </p>
-            ) : profileError ? (
-              <p className="account-message account-message--error" role="alert">{profileError}</p>
-            ) : (
-              <p role="status">Loading account details...</p>
-            )}
-            {message && <p className="account-message" role="status">{message}</p>}
-            {errorMessage && <p className="account-message account-message--error" role="alert">{errorMessage}</p>}
-            <button type="button" className="btn-secondary account-submit" onClick={onSignOut} disabled={submitting}>
-              {submitting ? 'Signing out...' : 'Sign out'}
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="account-mode-toggle" role="group" aria-label="Account action">
-              <button
-                type="button"
-                aria-pressed={mode === 'signin'}
-                className={mode === 'signin' ? 'is-active' : ''}
-                onClick={() => {
-                  setMode('signin')
-                  setMessage('')
-                  setErrorMessage('')
-                  setConfirmPassword('')
-                }}
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                aria-pressed={mode === 'signup'}
-                className={mode === 'signup' ? 'is-active' : ''}
-                onClick={() => {
-                  setMode('signup')
-                  setMessage('')
-                  setErrorMessage('')
-                }}
-              >
-                Customer sign up
-              </button>
-            </div>
-
-            <form className="account-form" onSubmit={onSubmit}>
-              {mode === 'signup' && (
+              {profile.role !== 'admin' && user.user_metadata?.requested_role === 'admin' && (
+                <p className="account-admin-note">
+                  Your account does not have admin privileges until the site owner approves the request.
+                </p>
+              )}
+            </>
+          ) : profileError ? (
+            <p className="account-message account-message--error" role="alert">{profileError}</p>
+          ) : (
+            <p role="status">Loading account details...</p>
+          )}
+          {sessionMessage && <p className="account-message" role="status">{sessionMessage}</p>}
+          {sessionError && <p className="account-message account-message--error" role="alert">{sessionError}</p>}
+          <button type="button" className="btn-secondary account-submit" onClick={onSignOut} disabled={submitting !== ''}>
+            {submitting === 'signout' ? 'Signing out...' : 'Sign out'}
+          </button>
+        </div>
+      ) : (
+        <>
+          {sessionError && <p className="account-message account-message--error" role="alert">{sessionError}</p>}
+          {sessionMessage && <p className="account-message" role="status">{sessionMessage}</p>}
+          <div className="account-grid">
+            <article className="account-card">
+              <p className="account-panel-eyebrow">Customer</p>
+              <h2>Customer account</h2>
+              <p className="account-panel-intro">Create an account or sign in to your customer account.</p>
+              <div className="account-mode-toggle" role="group" aria-label="Customer account action">
+                <button
+                  type="button"
+                  aria-pressed={customerMode === 'signin'}
+                  className={customerMode === 'signin' ? 'is-active' : ''}
+                  onClick={() => changeMode('customer', 'signin')}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={customerMode === 'signup'}
+                  className={customerMode === 'signup' ? 'is-active' : ''}
+                  onClick={() => changeMode('customer', 'signup')}
+                >
+                  Sign up
+                </button>
+              </div>
+              <form className="account-form" onSubmit={event => onSubmit(event, 'customer')}>
+                {customerMode === 'signup' && (
+                  <label className="account-field">
+                    <span>Full name</span>
+                    <input
+                      type="text"
+                      name="customer-name"
+                      autoComplete="name"
+                      value={customerForm.fullName}
+                      onChange={event => updateForm('customer', 'fullName', event.target.value)}
+                      maxLength={120}
+                      required
+                    />
+                  </label>
+                )}
                 <label className="account-field">
-                  <span>Full name</span>
+                  <span>Email</span>
                   <input
-                    type="text"
-                    name="name"
-                    autoComplete="name"
-                    value={fullName}
-                    onChange={event => setFullName(event.target.value)}
+                    type="email"
+                    name="customer-email"
+                    autoComplete="email"
+                    value={customerForm.email}
+                    onChange={event => updateForm('customer', 'email', event.target.value)}
                     required
-                    maxLength={120}
                   />
                 </label>
-              )}
-              <label className="account-field">
-                <span>Email</span>
-                <input
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={event => setEmail(event.target.value)}
-                  required
-                />
-              </label>
-              <label className="account-field">
-                <span>Password</span>
-                <input
-                  type="password"
-                  name="password"
-                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                  value={password}
-                  onChange={event => setPassword(event.target.value)}
-                  minLength={mode === 'signup' ? 8 : undefined}
-                  required
-                />
-                {mode === 'signup' && <span className="account-hint">Use at least 8 characters.</span>}
-              </label>
-              {mode === 'signup' && (
                 <label className="account-field">
-                  <span>Confirm password</span>
+                  <span>Password</span>
                   <input
                     type="password"
-                    name="confirm-password"
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={event => setConfirmPassword(event.target.value)}
-                    minLength={8}
+                    name="customer-password"
+                    autoComplete={customerMode === 'signup' ? 'new-password' : 'current-password'}
+                    value={customerForm.password}
+                    onChange={event => updateForm('customer', 'password', event.target.value)}
+                    minLength={customerMode === 'signup' ? 8 : undefined}
+                    required
+                  />
+                  {customerMode === 'signup' && <span className="account-hint">Use at least 8 characters.</span>}
+                </label>
+                {customerMode === 'signup' && (
+                  <label className="account-field">
+                    <span>Confirm password</span>
+                    <input
+                      type="password"
+                      name="customer-confirm-password"
+                      autoComplete="new-password"
+                      value={customerForm.confirmPassword}
+                      onChange={event => updateForm('customer', 'confirmPassword', event.target.value)}
+                      minLength={8}
+                      required
+                    />
+                  </label>
+                )}
+                {feedback.customer.message && <p className="account-message" role="status">{feedback.customer.message}</p>}
+                {feedback.customer.error && <p className="account-message account-message--error" role="alert">{feedback.customer.error}</p>}
+                <button type="submit" className="btn-primary account-submit" disabled={submitting !== ''}>
+                  {submitting === 'customer' ? 'Please wait...' : customerMode === 'signup' ? 'Create customer account' : 'Sign in as customer'}
+                </button>
+              </form>
+            </article>
+
+            <article className="account-card account-card--admin">
+              <p className="account-panel-eyebrow">Administrator</p>
+              <h2>Admin account</h2>
+              <p className="account-panel-intro">Use the separate admin form to request or access an administrator account.</p>
+              <div className="account-mode-toggle" role="group" aria-label="Admin account action">
+                <button
+                  type="button"
+                  aria-pressed={adminMode === 'signin'}
+                  className={adminMode === 'signin' ? 'is-active' : ''}
+                  onClick={() => changeMode('admin', 'signin')}
+                >
+                  Admin sign in
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={adminMode === 'signup'}
+                  className={adminMode === 'signup' ? 'is-active' : ''}
+                  onClick={() => changeMode('admin', 'signup')}
+                >
+                  Admin sign up
+                </button>
+              </div>
+              <form className="account-form" onSubmit={event => onSubmit(event, 'admin')}>
+                {adminMode === 'signup' && (
+                  <label className="account-field">
+                    <span>Full name</span>
+                    <input
+                      type="text"
+                      name="admin-name"
+                      autoComplete="name"
+                      value={adminForm.fullName}
+                      onChange={event => updateForm('admin', 'fullName', event.target.value)}
+                      maxLength={120}
+                      required
+                    />
+                  </label>
+                )}
+                <label className="account-field">
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    name="admin-email"
+                    autoComplete="email"
+                    value={adminForm.email}
+                    onChange={event => updateForm('admin', 'email', event.target.value)}
                     required
                   />
                 </label>
-              )}
-              {message && <p className="account-message" role="status">{message}</p>}
-              {errorMessage && <p className="account-message account-message--error" role="alert">{errorMessage}</p>}
-              <button type="submit" className="btn-primary account-submit" disabled={submitting}>
-                {submitting ? 'Please wait...' : mode === 'signup' ? 'Create customer account' : 'Sign in'}
-              </button>
-            </form>
-
-            <p className="account-admin-note">
-              Admin accounts are created and granted access manually by the site owner. Admins can sign in here once their account is provisioned.
-            </p>
-          </>
-        )}
-      </div>
+                <label className="account-field">
+                  <span>Password</span>
+                  <input
+                    type="password"
+                    name="admin-password"
+                    autoComplete={adminMode === 'signup' ? 'new-password' : 'current-password'}
+                    value={adminForm.password}
+                    onChange={event => updateForm('admin', 'password', event.target.value)}
+                    minLength={adminMode === 'signup' ? 8 : undefined}
+                    required
+                  />
+                  {adminMode === 'signup' && <span className="account-hint">Use at least 8 characters.</span>}
+                </label>
+                {adminMode === 'signup' && (
+                  <label className="account-field">
+                    <span>Confirm password</span>
+                    <input
+                      type="password"
+                      name="admin-confirm-password"
+                      autoComplete="new-password"
+                      value={adminForm.confirmPassword}
+                      onChange={event => updateForm('admin', 'confirmPassword', event.target.value)}
+                      minLength={8}
+                      required
+                    />
+                  </label>
+                )}
+                {feedback.admin.message && <p className="account-message" role="status">{feedback.admin.message}</p>}
+                {feedback.admin.error && <p className="account-message account-message--error" role="alert">{feedback.admin.error}</p>}
+                <button type="submit" className="btn-primary account-submit" disabled={submitting !== ''}>
+                  {submitting === 'admin' ? 'Please wait...' : adminMode === 'signup' ? 'Request admin account' : 'Sign in as admin'}
+                </button>
+              </form>
+              <p className="account-admin-note">
+                Admin sign-up creates an account request; it does not grant admin privileges. The site owner must review and approve access.
+              </p>
+            </article>
+          </div>
+        </>
+      )}
     </section>
   )
 }

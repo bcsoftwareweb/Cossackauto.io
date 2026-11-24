@@ -22,9 +22,20 @@ React + Vite frontend for the Cossack Auto Solutions website. Reservation reques
 
 The Supabase anon key is intended for browser use only when row-level security is enabled and policies are configured. Never put a Supabase `service_role` or secret key in frontend code or environment variables prefixed with `VITE_`. The schema uses row-level security: visitors can submit reservations and reviews, read only approved reviews, and upload photos to private storage. Reservation records and photos are not publicly readable.
 
-Customers can create an account from the **Account** page and sign in with email and password. If email confirmation is enabled in Supabase Auth, they must follow the confirmation link before signing in. Admin accounts are not self-service: create or promote an account manually in Supabase. New sign-ups always receive the `customer` role; the profile trigger ignores any role supplied by the browser.
+The **Account** page has separate customer and admin sign-in/sign-up forms. If email confirmation is enabled in Supabase Auth, users must follow the confirmation link before signing in. Admin sign-up creates an account and marks it as an access request; it does not grant admin privileges. The profile trigger always assigns new accounts the `customer` role, regardless of browser metadata. The `requested_role` metadata is only a request indicator and must never be used for authorization.
 
-To grant admin access, have the person create a customer account, then run this query in the Supabase SQL Editor with their email:
+Review admin access requests in the Supabase SQL Editor:
+
+```sql
+select p.id, u.email, p.full_name, p.created_at
+from public.profiles as p
+join auth.users as u on u.id = p.id
+where u.raw_user_meta_data ->> 'requested_role' = 'admin'
+  and p.role = 'customer'
+order by p.created_at desc;
+```
+
+After verifying a request, grant admin access by running this query with the account email:
 
 ```sql
 update public.profiles
@@ -36,7 +47,7 @@ where id = (
 );
 ```
 
-The profile table only lets a signed-in user read their own profile and update their name. It does not allow users to change their role. There is no admin dashboard yet.
+The profile table only lets a signed-in user read their own profile and update their name. It does not allow users to change their role. Admins sign in using the separate admin form. There is no admin dashboard yet.
 
 New reviews have `is_published = false`. To approve a review, use the Supabase Dashboard or SQL Editor to set that row's `is_published` value to `true`. For example:
 
